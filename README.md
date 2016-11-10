@@ -1,6 +1,8 @@
 # Opto
 
-YAML definition examples:
+An option parser, built for generating options from a YAML file, but can be just as well used for other things.
+
+## YAML definition examples:
 
 ```yaml
   - name: "remote_driver "
@@ -8,110 +10,106 @@ YAML definition examples:
     required: true
     label: "Remote Driver"
     description: "Remote Git and Auth scheme"
-    options:
+    options:  # array of options, will be used as value, label and description
       - github
       - bitbucket
       - gitlab
       - gogs
-  - variable: "remote_config"
-    type: "password"
-    required: true
-    label: "Remote Config"
-  - variable: "remote_config2"
-    type: "password"
-    required: true
-    label: "Remote Config"
 
-
-
-
-  - option: password
-    type: password
-    required: true
-    label: "Your password"
-
-  - option: foo.username
+  - name: foo.username
     type: string
     required: true
     min_length: 1
     max_length: 30
     strip: true
+    upcase: true
     env: FOO_USER
-    transform: upcase
 
-  - option: foo.os
+  - name: foo.os
     type: string
     required: true
-    suggested: coreos
+    can_be_other: true # otherwise value has to be one of the options
     options:
      - value: coreos
-       display: CoreOS
+       label: CoreOS
        description: CoreOS Stable
      - value: ubuntu
-       display: Ubuntu
+       label: Ubuntu
        description: Ubuntu Bubuntu
 
-  - option: foo.os
-    type: string
-    required: true
-    default: coreos
-    presets:
-     - value: coreos
-       display: CoreOS
-       description: CoreOS Stable
-     - value: ubuntu
-       display: Ubuntu
-       description: Ubuntu Bubuntu
-
-  - option: foo.instances
+  - name: foo.instances
     type: integer
     required: true
     default: 1
     min: 1
     max: 30
 
-  - option: host.url
+  - name: host.url
     type: uri
     default: http://localhost:8000
     schemes:
-      - http
-      - https
-
-  - option: host.name
-    type: string
-    min_length: 1
-    max_length: 30
-    regex: /^[a-z]+?\.[a-z]+?$/
-    default: %(server.hostname)
-
-# Data is the ssl certificate contents.
-# Env may contain the actual contents
-# Path env may contain the path to file with contents
-  - option: ssl.certificate
-    type: text
-    default_path: ~/.ssl/cert.pem
-    extension: .pem
-    path_env: SSL_CERT_PATH
-    env: SSL_CERT
-
-  - option: cert.keyfile
-    type: binary
-    transform: base64
-
-# Super advanced version 2:
-  - option: server.type
-    options_from:
-      url:
-        url: http://fooserver/foo
-				token_env: FOO_TOKEN
-				display_value: $..option:name
-				value: $..option:id
-				description: $..option:desc
-    default: baremetal_0
-
-  - option: username
-    presets_from:
-      exec:
-        command: cat /etc/passwd|cut -d"," -f1
-
+      - file # only allow file:/// uris
 ```
+
+Simple so far. Now let's mix in "resolvers" which can fetch the value from a number of sources or even generate new data:
+
+```yaml
+  - name: vault_iv
+    type: string
+    from: 
+      random_string:
+        length: 64
+        charset: ascii_printable
+
+  - name: aws_secret
+    type: string
+    strip: true # removes any leading / trailing whitespace from a string
+    upcase: true # turns the string to upcase
+    from:
+      env: 'FOOFOO'
+      file: /tmp/aws_secret.txt  # if env is not set, try to read it from this file, raises if not readable
+
+  - name: aws_secret
+    type: string
+    strip: true # removes any leading / trailing whitespace from a string
+    upcase: true # turns the string to upcase
+    from:
+      file: 
+        path: /tmp/aws_secret.txt
+        ignore_errors: true # if env is not set, try to read it from this file, returns nil if not readable
+      env: 'FOOFOO'  # because the previous returned nil, this one is tried
+      random_string: 30 # not there either, generate a random string.
+```
+
+Pretty nifty, right?
+
+## Examples
+
+```ruby
+# Read definitions from 'options' key inside a YAML:
+Opto.load('/tmp/stack.yml', :options)
+
+# Read definitions from root of YAML
+Opto.load('/tmp/stack.yml')
+
+# Create an option group:
+Opto.new( [ {name: 'foo', type: :string} ] )
+# or
+group = Opto::Group.new
+group.build_option(name: 'foo', type: :string, value: "hello")
+group.build_option(name: 'bar', type: :string, required: true)
+group.first
+=> #<Opto::Option:xxx>
+group.size
+=> 2
+group.each { .. }
+group.errors
+=> { 'bar' => { :presence => "Required value missing" } }
+group.options_with_errors.each { ... }
+group.valid?
+=> false
+```
+
+## Todo
+- Document the available types, resolvers and validations.
+- Add YARDocs

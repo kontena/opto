@@ -1,36 +1,41 @@
+require_relative 'extensions/snake_case'
+
 module Opto
   class Resolver
 
-    attr_accessor :option
-    attr_reader   :hint
+    using Opto::Extension::SnakeCase
 
-    def self.inherited(base)
-      @resolvers ||= []
-      @resolvers << base
+    attr_accessor :hint
+
+    class << self
+      def inherited(where)
+        resolvers[where.origin] = where
+      end
+
+      def resolvers
+        @resolvers ||= {}
+      end
+
+      def for(origin)
+        raise NameError, "Unknown resolver: #{origin}" unless resolvers[origin]
+        resolvers[origin]
+      end
+
+      def origin
+        name.to_s.split('::').last.snakecase.to_sym
+      end
     end
 
-    def self.resolvers(*filters)
-      @resolvers || {}
-    end
-
-    def self.resolver(origin)
-      resolver = resolvers.find { |resolver| resolver.origin == origin }
-      raise TypeError, "Unknown resolver: #{origin}" unless resolver
-      resolver
-    end
-
-    def self.origin(value_source=nil)
-      return @origin unless value_source
-      @origin = value_source
-    end
-
-    def initialize(option, hint = nil)
-      @option = option
+    def initialize(hint = nil)
       @hint = hint
     end
 
     def resolve
-      raise StandardError, "#{self.class}.resolve not defined"
+      raise RuntimeError, "#{self.class}.resolve not defined"
+    end
+
+    def origin
+      self.class.origin
     end
   end
 end
