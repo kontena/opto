@@ -26,8 +26,9 @@ module Opto
       end
     end
 
-    def initialize(hint = nil)
+    def initialize(hint = nil, option = nil)
       @hint = hint
+      @option = option
     end
 
     def resolve
