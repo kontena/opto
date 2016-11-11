@@ -26,7 +26,7 @@ An option parser, built for generating options from a YAML file, but can be just
     env: FOO_USER
 
   - name: foo.os
-    type: string
+    type: enum
     required: true
     can_be_other: true # otherwise value has to be one of the options
     options:
