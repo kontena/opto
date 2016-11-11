@@ -1,4 +1,5 @@
 require_relative '../spec_helper'
+require 'ostruct'
 
 describe Opto::Resolver do
   after(:each) do
@@ -28,6 +29,11 @@ describe Opto::Resolver do
 
     it 'raises if a suitable resolver is not found' do
       expect{Opto::Resolver.for(:foo_bar)}.to raise_error(NameError)
+    end
+
+    it 'knows its parent option' do
+      expect(Opto::Resolver.for(:resolver_test).new('hint', OpenStruct.new(name: 'foo')).option.name).to eq 'foo'
+      expect(Opto::Resolver.for(:resolver_test).new('hint', OpenStruct.new(name: 'foo')).hint).to eq 'hint'
     end
   end
 end
