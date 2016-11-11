@@ -14,6 +14,10 @@ describe Opto::Resolvers::RandomString do
       expect(subject.new(length: 200, charset: :hex).resolve).to match(/\A[a-f0-9]{200}\z/)
     end
 
+    it 'raises if hint is not set' do
+      expect{subject.new().resolve}.to raise_error(ArgumentError)
+    end
+
     it 'raises if length is not set' do
       expect{subject.new({}).resolve}.to raise_error(ArgumentError)
     end
