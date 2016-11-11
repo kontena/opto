@@ -6,6 +6,7 @@ module Opto
     using Opto::Extension::SnakeCase
 
     attr_accessor :hint
+    attr_accessor :option
 
     class << self
       def inherited(where)
