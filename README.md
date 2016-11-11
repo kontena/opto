@@ -110,6 +110,39 @@ group.valid?
 => false
 ```
 
+## Creating a custom resolver
+
+Want to prompt for values? Try something like this:
+
+```ruby
+# gem install tty-prompt
+require 'tty-prompt'
+class Prompter < Opto::Resolver
+  def resolve
+    # option = accessor to the option currently being resolved
+    # option.handler = accessor to the type handler
+    # hint = resolver options, for example the env variable name for env resolver, not used here.
+    if option.type == :enum
+      TTY::Prompt.new.select("Select #{option.label}") do |menu|
+        option.handler.options[:options].each do |opt| # quite ugly way to access the option's value list definition
+          menu.choice opt[:label], opt[:value]
+        end
+      end
+    else
+      TTY::Prompt.new.ask("Enter value for #{option.label}")
+    end
+  end
+end
+
+# And the option:
+- name: foo
+  type: enum
+  options:
+    - foo: Foo
+    - bar: Bar
+  from: prompter
+```
+
 ## Todo
 - Document the available types, resolvers and validations.
 - Add YARDocs
