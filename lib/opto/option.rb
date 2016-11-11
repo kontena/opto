@@ -75,7 +75,7 @@ module Opto
     end
 
     def resolvers
-      @resolvers ||= from.map { |origin, hint| Resolver.for(origin).new(hint) }
+      @resolvers ||= from.map { |origin, hint| Resolver.for(origin).new(hint, self) }
     end
 
     def normalize_origins(origins)
