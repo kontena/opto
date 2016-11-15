@@ -81,6 +81,64 @@ Simple so far. Now let's mix in "resolvers" which can fetch the value from a num
       random_string: 30 # not there either, generate a random string.
 ```
 
+## Conditionals
+
+There's also rudimentary conditional support:
+
+```yaml
+  - name: foo
+    type: string
+    value: 'hello'
+  - name: bar
+    type: integer
+    only_if: 
+      - foo: hello
+```
+
+```ruby
+ group.option('bar').skip? 
+ => false
+ group.option('foo').value = 'world'
+ group.option('bar').skip? 
+ => true
+```
+
+```yaml
+  - name: bar
+    type: integer
+    skip_if: 
+      - foo: 'hello'
+```
+
+```ruby
+ group.option('foo').value = 'world'
+ group.option('bar').skip? 
+ => false
+ group.option('foo').value = 'hello'
+ group.option('bar').skip? 
+ => true
+```
+
+```yaml
+ # And these work too:
+
+  - name: bar
+    type: integer
+    skip_if: 
+      - foo: hello # AND
+      - baz: world
+
+  - name: bar
+    type: integer
+    only_if: foo   # foo is not null
+
+  - name: bar
+    type: integer
+    only_if: 
+      - foo   # foo is not null
+      - baz   # AND baz is not null
+```
+
 Pretty nifty, right?
 
 ## Examples
@@ -122,6 +180,7 @@ class Prompter < Opto::Resolver
     # option = accessor to the option currently being resolved
     # option.handler = accessor to the type handler
     # hint = resolver options, for example the env variable name for env resolver, not used here.
+    return nil if option.skip?
     if option.type == :enum
       TTY::Prompt.new.select("Select #{option.label}") do |menu|
         option.handler.options[:options].each do |opt| # quite ugly way to access the option's value list definition

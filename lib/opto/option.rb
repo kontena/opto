@@ -16,6 +16,9 @@ module Opto
     attr_accessor :required
     attr_accessor :default
     attr_reader   :from
+    attr_reader   :group
+    attr_reader   :skip_if
+    attr_reader   :only_if
     attr_reader   :initial_value
     attr_reader   :type_options
 
@@ -29,21 +32,30 @@ module Opto
       @default       = opts.delete(:default)
       val            = opts.delete(:value)
       @from          = { default: self }.merge(normalize_origins(opts.delete(:from)))
+      @skip_if       = opts.delete(:skip_if)
+      @only_if       = opts.delete(:only_if)
+      @skip_lambdas  = normalize_ifs(@skip_if)
+      @only_lambdas  = normalize_ifs(@only_if)
+      @group         = opts.delete(:group)
       @type_options  = opts
 
       val ? set_initial(val) : set(resolve)
     end
 
     def to_h(with_errors: false, with_value: true)
-      {
+      hash = {
         name: name,
         label: label,
         type: type,
         description: description,
         default: default,
         from: from.reject { |k,_| k == :default},
-        value: with_value ? value : nil
-      }.merge(type_options).reject { |_,v| v.nil? }.merge(with_errors ? {errors: errors} : {})
+      }.merge(type_options).reject { |_,v| v.nil? }
+      hash[:skip_if] = skip_if if skip_if
+      hash[:only_if] = only_if if only_if
+      hash[:errors]  = errors  if with_errors
+      hash[:value]   = value   if with_value
+      hash
     end
 
 
@@ -54,6 +66,16 @@ module Opto
     end
 
     alias_method :value=, :set
+
+    def skip?
+      return true if     @skip_lambdas.any? { |s| s.call(self) }
+      return true unless @only_lambdas.all? { |s| s.call(self) }
+      false
+    end
+
+    def value_of(option_name)
+      group.nil? ? nil : group.value_of(option_name)
+    end
 
     def validate
       handler.validate(@value)
@@ -76,6 +98,25 @@ module Opto
 
     def resolvers
       @resolvers ||= from.map { |origin, hint| Resolver.for(origin).new(hint, self) }
+    end
+
+    def normalize_ifs(ifs)
+      case ifs
+      when NilClass
+        []
+      when Array
+        ifs.map do |iff|
+          lambda { |opt| !opt.value_of(iff).nil? }
+        end
+      when Hash
+        ifs.each_with_object([]) do |(k, v), arr|
+          arr << lambda { |opt| opt.value_of(k.to_s) == v }
+        end
+      when String, Symbol
+        [lambda { |opt| !opt.value_of(ifs.to_s).nil? }]
+      else
+        raise TypeError, "Invalid syntax for if"
+      end
     end
 
     def normalize_origins(origins)

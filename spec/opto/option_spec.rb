@@ -208,5 +208,69 @@ describe Opto::Option do
     end
   end
 
+  context '#group_member' do
+    let(:group) do 
+      Opto::Group.new(
+        [
+          { name: 'foo', type: :string },
+          { name: 'bar', type: :integer, value: 2 },
+          { name: 'skip_if_foo', type: :string, skip_if: 'foo' },
+          { name: 'only_if_bar', type: :string, only_if: 'bar' },
+          { name: 'only_if_bar_2', type: :string, only_if: { 'bar' => 2 } },
+          { name: 'only_if_bar_3_foo_not_baz', type: :string, skip_if: { 'foo' => 'baz' }, only_if: { 'bar' => 3 } },
+          { name: 'only_if_bar_and_foo', type: :string, only_if: [ 'bar', 'foo' ] }
+        ]
+      )
+    end
+
+    it 'knows its group' do
+      expect(group.first.group).to eq group
+    end
+
+    it 'finds group buddies' do
+      expect(group.last.group.option('foo').name).to eq 'foo'
+      expect(group.last.group.option('foo').type).to eq 'string'
+    end
+
+    it 'knows values of group buddies' do
+      expect(group.last.value_of('bar')).to eq 2
+    end
+
+    it 'knows when to skip' do
+      expect(group.option('skip_if_foo').skip?).to be_falsey
+      group.option('foo').value = 'baz'
+      expect(group.option('skip_if_foo').skip?).to be_truthy
+
+      group.option('bar').value = 2
+      expect(group.option('only_if_bar').skip?).to be_falsey
+      group.option('bar').value = nil
+      expect(group.option('only_if_bar').skip?).to be_truthy
+
+      group.option('bar').value = 2
+      expect(group.option('only_if_bar_2').skip?).to be_falsey
+      group.option('bar').value = 3
+      expect(group.option('only_if_bar_2').skip?).to be_truthy
+
+      group.option('bar').value = 3
+      group.option('foo').value = 'baz'
+      expect(group.option('only_if_bar_3_foo_not_baz').skip?).to be_truthy
+
+      group.option('bar').value = 3
+      group.option('foo').value = 'bar'
+      expect(group.option('only_if_bar_3_foo_not_baz').skip?).to be_falsey
+
+      group.option('bar').value = nil
+      group.option('foo').value = 'yes'
+      expect(group.option('only_if_bar_and_foo').skip?).to be_truthy
+      group.option('bar').value = 2
+      expect(group.option('only_if_bar_and_foo').skip?).to be_falsey
+      group.option('foo').value = nil
+      expect(group.option('only_if_bar_and_foo').skip?).to be_truthy
+    end
+
+    it 'raises if ifs are not kosher' do
+      expect{Opto::Option.new(name: 'foo', type: :string, only_if: 3)}.to raise_error(TypeError)
+    end
+  end
 end
 

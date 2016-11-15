@@ -8,20 +8,23 @@ module Opto
 
       OPTIONS = {
         min: 0,
-        max: nil
+        max: nil,
+        nil_is_zero: false
       }
 
       sanitizer :to_i do |value|
-        value.to_i
+        value.nil? ? (options[:nil_is_zero] ? 0 : nil) : value.to_i
       end
 
       validator :min do |value|
+        return nil if value.nil?
         if options[:min] && value < options[:min]
           "Too small. Minimum value is #{options[:min_length]}, Value is #{value}."
         end
       end
 
       validator :max do |value|
+        return nil if value.nil?
         if options[:max] && value > options[:max]
           "Too large. Maximum value is #{options[:max]}, Value is #{value}."
         end

@@ -9,9 +9,13 @@ module Opto
     when Hash
       Option.new(opts)
     when Array
-      Group.new(opts)
+      if opts.all? {|o| o.kind_of?(Hash) }
+        Group.new(opts)
+      else
+        raise TypeError, "Invalid input, an option hash or an array of option hashes required"
+      end
     else
-      raise TypeError, "Option definition hash or array of option definition hashes required"
+      raise TypeError, "Invalid input, an option hash or an array of option hashes required"
     end
   end
 
