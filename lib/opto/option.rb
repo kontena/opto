@@ -26,7 +26,7 @@ module Opto
       opts           = options.dup
       type           = opts.delete(:type)
       @type          = type.to_s.snakecase unless type.nil?
-      @name          = opts.delete(:name)
+      @name          = opts.delete(:name).to_s.downcase
       @label         = opts.delete(:label) || @name
       @description   = opts.delete(:description)
       @default       = opts.delete(:default)

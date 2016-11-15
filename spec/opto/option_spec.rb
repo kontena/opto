@@ -236,6 +236,10 @@ describe Opto::Option do
       expect(group.last.value_of('bar')).to eq 2
     end
 
+    it 'knows values of group buddies even with different case' do
+      expect(group.last.value_of('bAr')).to eq 2
+    end
+
     it 'knows when to skip' do
       expect(group.option('skip_if_foo').skip?).to be_falsey
       group.option('foo').value = 'baz'

@@ -31,7 +31,7 @@ module Opto
     end
 
     def option(option_name)
-      options.find { |opt| opt.name == option_name }
+      options.find { |opt| opt.name == option_name.downcase }
     end
 
     def value_of(option_name)
