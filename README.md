@@ -1,5 +1,7 @@
 # Opto
 
+[![Build Status](https://travis-ci.org/kontena/opto.svg?branch=master)](https://travis-ci.org/kontena/opto)
+
 An option parser, built for generating options from a YAML file, but can be just as well used for other things.
 
 ## YAML definition examples:

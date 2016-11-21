@@ -1,5 +1,15 @@
-sudo: false
 language: ruby
 rvm:
+  - 2.0.0-p648
   - 2.3.1
+env:
+  - secure: "HAJRG+iaNDuyOMlbYSsXNjA2jwTMQonYJ3fHhm4zDPmIMupNnM+Krx650rVqlMP2KpNIYg4BEWCaDobTU9HoOy0AApmPGc8gGHMCP6v3cSnoGHxmiFy8yB7szgltcBz27PLeJN+exxRCjWPk677jW7JaooyYVSD64dEgVUrFju7olWUrvR0a0hAfBfawXU6kiGgdLnIEtc4AK+mokN9J6fR2PJthuDirZNgDPtVPuBJNFErI9Rh200stcZDOE3F1QE80HyAbrsyfvN/9cosSYDhJS9G+awAw6S+BqeBFZTQlDkWqJgdGsaacasxAmB5bgpkFY5tuv8DdqksK4nXlvsGVurQOYyufuc0y7HllPFVBPkzETCyWaafzek9acfTriLKJIJ26sFYQpuGQlgmAT/KyKYqqzX1ZAk/qe+haT5dt19bXzCHQHWapnWIll11AU0F67TiastmfyaBhnO8d983rwyxIww+8n3AfGPJXZ2eEjw2Rr17yqPYIVtkRoy7ctvCVJTeC6nDGhCqgU5lfl59656fzmJaBI9nWkadK0hQY8WB/5sLJ72pnRZDBbv3xIddS+JnDqxQWheMaJ7Oz5MkbHzdmRo3EhuHGPYpsdPQoeMudqGXX6OTxkQcRbKqJOHDE58rQzz7cZPvY2fwYOkhCspjLWcUAytbaMDkrEVs="
 before_install: gem install bundler -v 1.12.5
+cache: bundler
+script: bundle install && bundle exec rspec spec/
+deploy:
+  provider: rubygems
+  api_key: $GEM_TOKEN
+  gem: kontena-plugin-digitalocean
+  on:
+    tags: true
