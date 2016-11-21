@@ -204,6 +204,3 @@ end
   from: prompter
 ```
 
-## Todo
-- Document the available types, resolvers and validations.
-- Add YARDocs
