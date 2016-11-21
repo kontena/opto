@@ -1,5 +1,6 @@
 module Opto
   module Resolvers
+    # Read the value from a file, path defined in hint.
     class File < Opto::Resolver
 
       def resolve

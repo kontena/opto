@@ -3,6 +3,12 @@ require_relative '../extensions/hash_string_or_symbol_key'
 
 module Opto
   module Types
+    # A number.
+    #
+    # Options
+    #   :min - minimum allowed value (default 0, can be negative)
+    #   :max - maximum allowed value
+    #   :nil_is_zero : set to true if you want to turn a null value into 0
     class Integer < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 

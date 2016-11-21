@@ -3,6 +3,35 @@ require_relative '../extensions/hash_string_or_symbol_key'
 
 module Opto
   module Types
+    # A list of possible values
+    #
+    # :options  - a list of possible values for this enum
+    # :can_be_other - set to true if the value can be outside of the value list in options
+    # :in - when "can be other" is defined, this can be used to define an extra set of possible values
+    #
+    # @example Shorthand option list
+    #   Opto::Option.new(
+    #     name: 'foo',
+    #     type: 'enum',
+    #     options: 
+    #       - foo
+    #       - bar
+    #       - cat
+    #     can_be_other: true
+    #   )
+    #
+    # @example Detailed option list
+    #   Opto::Option.new(
+    #     name: 'foo',
+    #     type: 'enum',
+    #     options:
+    #       - value: cat
+    #         label: Cat
+    #         description: A four legged ball of fur
+    #       - value: dog
+    #         label: Dog
+    #         description: A friendly furry creature with a tail, says 'woof'
+    #   )
     class Enum < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 

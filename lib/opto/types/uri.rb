@@ -4,6 +4,10 @@ require 'uri'
 
 module Opto
   module Types
+    # An uri/url.
+    #
+    # Options:
+    #   schemes: an array of allowed schemes, such as ['http', 'https', 'file']
     class Uri < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 

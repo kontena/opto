@@ -1,5 +1,7 @@
 module Opto
   module Extension
+    # Refines String to have .snakecase method that turns
+    # StringLikeThis into a string_like_this
     module SnakeCase
       refine String do
         def snakecase

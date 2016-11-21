@@ -3,12 +3,19 @@ require_relative '../extensions/hash_string_or_symbol_key'
 
 module Opto
   module Types
+    # A boolean value.
+    #
+    # Options:
+    #   :truthy an array of strings / values that are converted to True.
+    #   :nil_is by default false
+    #   :blank_is by default false too
+    #   :as by default outputs a string
+    #   :true says "true" by default when outputting a string
+    #   :false says "false" by default when outputting a string
     class Boolean < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 
       OPTIONS = {
-        min: 0,
-        max: nil,
         truthy: ['true', 'yes', '1', 'on', 'enabled', 'enable'],
         nil_is: false,
         blank_is: false,

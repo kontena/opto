@@ -2,6 +2,7 @@ require_relative '../extensions/hash_string_or_symbol_key'
 
 module Opto
   module Resolvers
+    # Geneerate a new random number. Requires :min and :max in hint to define range.
     class RandomNumber < Opto::Resolver
 
       using Opto::Extension::HashStringOrSymbolKey

@@ -2,6 +2,21 @@ require_relative '../extensions/hash_string_or_symbol_key'
 
 module Opto
   module Resolvers
+    # Generates a random string.
+    #
+    # Requires at least  :length. 
+    # Also accepts :charset which can be one of: 
+    # - numbers (0-9), 
+    # - letters (a-z + A-Z), 
+    # - downcase (a-z), 
+    # - upcase (A-Z),
+    # - alphanumeric (0-9 + a-z + A-Z), 
+    # - hex (0-9 + a-f), 
+    # - hex_upcase (0-9 + A-F), 
+    # - base64 (base64 charset (length has to be divisible by four when using base64)),
+    #-  ascii_printable (all printable ascii chars)
+    # - or a set of characters, for example:
+    #   { length: 8, charset: '01' }  Will generate something like:  01001100
     class RandomString < Opto::Resolver
 
       using Opto::Extension::HashStringOrSymbolKey

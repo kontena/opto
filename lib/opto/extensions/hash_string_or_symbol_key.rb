@@ -1,5 +1,6 @@
 module Opto
   module Extension
+    # Refines Hash so that [] and delete work with :symbol or 'string' keys
     module HashStringOrSymbolKey
       refine Hash do
         def [](key)

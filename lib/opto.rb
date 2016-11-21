@@ -3,7 +3,10 @@ require "opto/option"
 require "opto/group"
 require 'yaml'
 
+# An option parser/validator/resolver
+#
 module Opto
+  # Initialize a new Opto::Option (when input is hash) or an Opto::Group (when input is an array of hashes)
   def self.new(opts)
     case opts
     when Hash
@@ -19,6 +22,11 @@ module Opto
     end
   end
 
+  # Read an option (or option group) from a YAML file
+  # @param [String] path_to_file
+  # @param [String,Symbol] a key in the hash representation of the file, such as :variables to read the options from (instead of using the root)
+  # @example
+  #   Opto.read('/tmp/foo.yml', :options)
   def self.read(yaml_path, key=nil)
     opts = YAML.load(File.read(yaml_path))
     new(key.nil? ? opts : opts[key])

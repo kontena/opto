@@ -4,6 +4,19 @@ require 'base64'
 
 module Opto
   module Types
+    # A string
+    #
+    # Options:
+    #   - min_length: minimum lenght
+    #   - max_length: maximum length
+    #   - empty_is_nil: an empty string will be replaced with nil
+    #   - encode_64: set to true if you want the final value to be base64 encoded representation
+    #   - decode_64: set to true if your string is in base64 and you want to convert to plain text
+    #   - upcase: set to true to upcase the string
+    #   - downcase: set to true to downcase the string
+    #   - strip: set to true to remove leading and trailing whitespace
+    #   - chomp: set to true to remove trailing linefeed
+    #   - capitalize: set to true to upcase the first letter
     class String < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 

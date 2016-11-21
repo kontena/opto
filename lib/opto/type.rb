@@ -2,6 +2,7 @@ require_relative 'extensions/snake_case'
 require_relative 'extensions/hash_string_or_symbol_key'
 
 module Opto
+  # Defines a type handler. Used as a base from which to inherit in the type handlers.
   class Type
     GLOBAL_OPTIONS = {
       required: true
@@ -25,6 +26,8 @@ module Opto
         name.to_s.split('::').last.snakecase.to_sym
       end
 
+      # Find a type handler for :type_name, for example: Opto::Type.for(:string)
+      # @param [String,Symbol] type_name
       def for(type_name)
         raise NameError, "No handler for type #{type_name}" unless types[type_name]
         types[type_name]
@@ -34,6 +37,15 @@ module Opto
         @validators ||= []
       end
 
+      # Define a validator:
+      # @example
+      #   class Foo < Opto::Type
+      #     validator :is_foo do |value|
+      #       unless value == 'foo'
+      #         "Foo is not foo."
+      #        end
+      #     end
+      #   end
       def validator(name, &block)
         raise TypeError, "Block required" unless block_given?
         validators << define_method("validate_#{name}", block)
@@ -43,12 +55,25 @@ module Opto
         @sanitizers ||= []
       end
 
+      # Define a sanitizer. Can be used to for example convert strings to integers
+      # or to remove whitespace, etc.
+      #
+      # @example
+      #   class Foo < Opto::Type
+      #     sanitizer :add_suffix |value|
+      #       value.to_s + "-1"
+      #     end
+      #   end
       def sanitizer(name, &block)
         raise TypeError, "Block required" unless block_given?
         sanitizers << define_method("sanitize_#{name}", &block)
       end
     end
 
+    # The default :in validator, returns an error unless the
+    # value is not one of listed in the :in definition of the option,
+    # @example
+    #   Opto::Option.new(name: 'foo', type: 'string', in: ['dog', 'cat']) (only "dog" or "cat" allowed as value)
     validator :in do |value|
       return true unless options[:in]
       options[:in].each do |val|

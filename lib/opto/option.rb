@@ -4,6 +4,9 @@ require_relative 'extensions/snake_case'
 require_relative 'extensions/hash_string_or_symbol_key'
 
 module Opto
+  # What is an option? It's like a variable that has a value, which can be validated or 
+  # manipulated on creation. The value can be resolved from a number of origins, such as
+  # an environment variable or random string generator.
   class Option
 
     using Opto::Extension::SnakeCase
@@ -22,11 +25,50 @@ module Opto
     attr_reader   :initial_value
     attr_reader   :type_options
 
+    # Initialize an instance of Opto::Option
+    # @param [Hash] options
+    #   @option [String] :name Option name
+    #   @option [String,Symbol] :type Option type, such as :integer, :string, :boolean, :enum
+    #   @option [String] :label A label for this field, to be used in for example an interactive prompt
+    #   @option [String] :description Same as label, but more detailed
+    #   @option [*] :default Default value for option
+    #   @option [String,Symbol,Array<String,Symbol,Hash>,Hash] :from Resolver origins
+    #   @option [String,Symbol,Array<String,Symbol,Hash>,Hash] :skip_if Conditionals that define if this option should be skipped
+    #   @option [String,Symbol,Array<String,Symbol,Hash>,Hash] :only_if Conditionals that define if this option should be included
+    #   @option [Opto::Group] :group Parent group reference
+    #   @option [...] Type definition options, such as { min_length: 3, strip: true }
+    #
+    # @example Create an option
+    #   Opto::Option.new(
+    #     name: 'cat_name',
+    #     type: 'string',
+    #     label: 'Name of your Cat',
+    #     required: true,
+    #     description: 'Enter a name for your cat',
+    #     from:
+    #       env: 'CAT_NAME'
+    #     only_if: 
+    #       pet: 'cat'
+    #     min_length: 2
+    #     max_length: 20
+    #   )
+    #
+    # @example Create a random string
+    #   Opto::Option.new(
+    #     name: 'random_string',
+    #     type: :string,
+    #     from:
+    #       random_string:
+    #         length: 20
+    #         charset: ascii_printable
+    #   )
     def initialize(options = {})
       opts           = options.dup
+      @name          = opts.delete(:name).to_s.downcase
+
       type           = opts.delete(:type)
       @type          = type.to_s.snakecase unless type.nil?
-      @name          = opts.delete(:name).to_s.downcase
+
       @label         = opts.delete(:label) || @name
       @description   = opts.delete(:description)
       @default       = opts.delete(:default)
@@ -42,6 +84,10 @@ module Opto
       val ? set_initial(val) : set(resolve)
     end
 
+    # Hash representation of Opto::Option. Can be passed back to Opto::Option.new
+    # @param [Boolean] with_errors Include possible validation errors hash
+    # @param [Boolean] with_value Include current value
+    # @return [Hash]
     def to_h(with_errors: false, with_value: true)
       hash = {
         name: name,
@@ -58,7 +104,8 @@ module Opto
       hash
     end
 
-
+    # Set option value. Also aliased as #value=
+    # @param value
     def set(value)
       @value = handler.sanitize(value)
       validate
@@ -67,26 +114,36 @@ module Opto
 
     alias_method :value=, :set
 
+    # Returns true if this field should not be processed because of the conditionals
+    # @return [Boolean]
     def skip?
       return true if     @skip_lambdas.any? { |s| s.call(self) }
       return true unless @only_lambdas.all? { |s| s.call(self) }
       false
     end
 
+    # Get a value of another Opto::Group member
+    # @param [String] option_name
     def value_of(option_name)
       group.nil? ? nil : group.value_of(option_name)
     end
 
+    # Run validators
+    # @raise [TypeError, ArgumentError]
     def validate
       handler.validate(@value)
     rescue StandardError => ex
       raise ex, "Validation for #{name} : #{ex.message}"
     end
 
+    # Access the Opto::Type handler for this option
+    # @return [Opto::Type]
     def handler
       @handler ||= Type.for(type).new(type_options)
     end
 
+    # The value of this option. Will try to run resolvers.
+    # @return option_value
     def value
       return @value unless @value.nil?
       unless @tried_resolve
@@ -96,8 +153,45 @@ module Opto
       @value
     end
 
+    # Accessor to defined resolvers for this option.
+    # @return [Array<Opto::Resolver>]
     def resolvers
       @resolvers ||= from.map { |origin, hint| Resolver.for(origin).new(hint, self) }
+    end
+
+    # True if this field is defined as required: true
+    # @return [Boolean]
+    def required?
+      handler.required?
+    end
+
+    # Run resolvers
+    # @raise [TypeError, ArgumentError]
+    def resolve
+      resolvers.each do |resolver|
+        begin
+          result = resolver.resolve
+        rescue StandardError => ex
+          raise ex, "Resolver '#{resolver.origin}' for '#{name}' : #{ex.message}"
+        end
+        if result
+          @origin = resolver.origin
+          return result
+        end
+      end
+      nil
+    end
+
+    # True if value is valid
+    # @return [Boolean]
+    def valid?
+      handler.valid?(value)
+    end
+
+    # Validation errors
+    # @return [Hash]
+    def errors
+      handler.errors
     end
 
     def normalize_ifs(ifs)
@@ -143,33 +237,6 @@ module Opto
       end
     end
 
-    def required?
-      handler.required?
-    end
-
-    def resolve
-      resolvers.each do |resolver|
-        begin
-          result = resolver.resolve
-        rescue StandardError => ex
-          raise ex, "Resolver '#{resolver.origin}' for '#{name}' : #{ex.message}"
-        end
-        if result
-          @origin = resolver.origin
-          return result
-        end
-      end
-      nil
-    end
-
-    def valid?
-      handler.valid?(value)
-    end
-
-    def errors
-      handler.errors
-    end
-    
     private
 
     def set_initial(value)
@@ -177,6 +244,5 @@ module Opto
       @origin = :initial
       set(value)
     end
-
   end
 end
