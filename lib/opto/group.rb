@@ -40,6 +40,12 @@ module Opto
       options.map(&:to_h)
     end
 
+    # Convert a Group to a hash that has { option_name => option_value }
+    # @return [Hash]
+    def to_h
+      Hash[*options.flat_map {|opt| [opt.name, opt.value]}]
+    end
+
     # Initialize a new Option to this group. Takes the same arguments as Opto::Option
     # @param [Hash] option_definition
     # @return [Opto::Option]

@@ -37,6 +37,13 @@ describe Opto::Group do
     expect(arr.all? {|a| a.kind_of?(Hash)}).to be_truthy
   end
 
+  it 'converts the options to a hash of names and values' do
+    instance = subject.new([{type: :string, name: 'foo'}, {type: :integer, name: 'bar', value: 1}])
+    hash = instance.to_h
+    expect(hash['foo']).to be_nil
+    expect(hash['bar']).to eq 1
+  end
+
   it 'can add a new option to the collection' do
     instance = subject.new([{type: :string, name: 'foo'}, {type: :integer, name: 'bar', value: 1}])
     instance.build_option(name: 'blerb', type: :string)
