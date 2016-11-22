@@ -3,11 +3,27 @@ require_relative '../spec_helper'
 describe Opto::Group do
   let(:subject) { described_class }
 
-  it 'creates a collection of options' do
+  it 'creates a collection of options from an array' do
     instance = subject.new([{type: :string, name: 'foo'}, {type: :integer, name: 'bar'}])
     expect(instance.size).to eq 2
     expect(instance.first.name).to eq 'foo'
     expect(instance.last.name).to eq 'bar'
+  end
+
+  it 'creates a collection of options from a hash' do
+    instance = subject.new(foo: {type: :string}, bar: {type: :integer})
+    expect(instance.size).to eq 2
+    expect(instance.first.name).to eq 'foo'
+    expect(instance.last.name).to eq 'bar'
+  end
+
+  it 'creates a blank collection' do
+    instance = subject.new
+    expect(instance.size).to eq 0
+  end
+
+  it 'raises if something weird is passed in' do
+    expect{subject.new(1)}.to raise_error(TypeError)
   end
 
   it 'can validate all options' do

@@ -15,6 +15,10 @@ describe Opto do
       expect(Opto.new([{type: :string, name: 'gneh'}, {type: :integer, name: 'flof'}]).first).to be_kind_of(Opto::Option)
     end
 
+    it 'can create option groups from hashes' do
+      expect(Opto.new(gneh: {type: :string}, flof: {type: :integer})).to be_kind_of(Opto::Group)
+    end
+
     it 'raises if trying to pass something strange' do
       expect{Opto.new('fleff')}.to raise_error(TypeError)
       expect{Opto.new(['fleff'])}.to raise_error(TypeError)

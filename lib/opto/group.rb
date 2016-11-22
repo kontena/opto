@@ -10,10 +10,19 @@ module Opto
     extend Forwardable
 
     # Initialize a new Option Group.
-    # @param [Array<Hash,Opto::Option>] opts An array of Option definition hashes or Option objects.
+    # @param [Array<Hash,Opto::Option>,Hash,NilClass] opts An array of Option definition hashes or Option objects or a hash like { var_name: { opts } }.
     # @return [Opto::Group]
-    def initialize(opts = [])
-      @options = opts.map {|opt| opt.kind_of?(Opto::Option) ? opt : Option.new(opt.merge(group: self)) }
+    def initialize(opts = nil)
+      case opts
+      when NilClass
+        @options = []
+      when Hash
+        @options = opts.map {|k,v| Option.new({name: k.to_s, group: self}.merge(v))}
+      when Array
+        @options = opts.map {|opt| opt.kind_of?(Opto::Option) ? opt : Option.new(opt.merge(group: self)) }
+      else
+        raise TypeError, "Invalid type #{opts.class} for Opto::Group.new"
+      end
     end
 
     # Are all options valid? (Option value passes validation)

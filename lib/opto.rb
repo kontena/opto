@@ -10,7 +10,11 @@ module Opto
   def self.new(opts)
     case opts
     when Hash
-      Option.new(opts)
+      if opts.has_key?('name') || opts.has_key?(:name)
+        Option.new(opts)
+      else
+        Group.new(opts)
+      end
     when Array
       if opts.all? {|o| o.kind_of?(Hash) }
         Group.new(opts)
