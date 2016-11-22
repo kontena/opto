@@ -62,6 +62,11 @@ describe Opto::Option do
         subject.value = 'bleh'
         expect(subject.value).to eq 'bleh'
       end
+
+      it 'calls the after_set with self on type handler' do
+        expect(subject.handler).to receive(:after_set).with(subject).and_return(nil)
+        subject.value = 'fnif'
+      end
     end
 
     describe '#validate' do
@@ -87,8 +92,10 @@ describe Opto::Option do
 
     describe '#handler' do
       let(:type) { double(:type) }
+
       it 'gets a type handler from Opto::Type' do
         expect(Opto::Type).to receive(:for).with('string').and_return(type)
+        allow(type).to receive(:after_set).and_return(nil)
         expect(type).to receive(:new).with(hash_including(strip: true)).and_return(type)
         allow(type).to receive(:sanitize).and_return('foo')
         allow(type).to receive(:validate).and_return(true)

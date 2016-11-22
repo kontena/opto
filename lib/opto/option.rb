@@ -109,6 +109,7 @@ module Opto
     def set(value)
       @value = handler.sanitize(value)
       validate
+      handler.after_set(self)
       @value
     end
 
