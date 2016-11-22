@@ -45,14 +45,18 @@ module Opto
 
     # Convert Group to an Array of Hashes (by calling .to_h on each member)
     # @return [Array<Hash>]
-    def to_a
-      options.map(&:to_h)
+    def to_a(with_errors: false, with_value: false)
+      options.map {|opt| opt.to_h(with_errors: with_errors, with_value: with_value) }
     end
 
     # Convert a Group to a hash that has { option_name => option_value }
     # @return [Hash]
-    def to_h
-      Hash[*options.flat_map {|opt| [opt.name, opt.value]}]
+    def to_h(values_only: false, with_values: false, with_errors: false)
+      if values_only
+        Hash[*options.flat_map {|opt| [opt.name, opt.value]}]
+      else
+        Hash[*options.flat_map {|opt| [opt.name, opt.to_h(with_value: with_values, with_errors: with_errors).reject {|k,_| k==:name}]}]
+      end
     end
 
     # Initialize a new Option to this group. Takes the same arguments as Opto::Option

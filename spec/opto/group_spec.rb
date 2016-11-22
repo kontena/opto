@@ -53,11 +53,17 @@ describe Opto::Group do
     expect(arr.all? {|a| a.kind_of?(Hash)}).to be_truthy
   end
 
-  it 'converts the options to a hash of names and values' do
+  it 'converts the options to a hash of names and values with "values_only: true"' do
     instance = subject.new([{type: :string, name: 'foo'}, {type: :integer, name: 'bar', value: 1}])
-    hash = instance.to_h
+    hash = instance.to_h(values_only: true)
     expect(hash['foo']).to be_nil
     expect(hash['bar']).to eq 1
+  end
+
+  it 'converts the options to a hash of names and opt definitions when "values_only: false"' do
+    instance = subject.new([{type: :string, name: 'foo'}, {type: :integer, name: 'bar', value: 1}])
+    hash = instance.to_h
+    expect(hash['foo'][:type]).to eq 'string'
   end
 
   it 'can add a new option to the collection' do
