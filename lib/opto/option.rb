@@ -73,7 +73,7 @@ module Opto
         opts = @group.defaults.merge(opts)
       end
 
-      @name          = opts.delete(:name).to_s.downcase
+      @name          = opts.delete(:name).to_s
 
       type           = opts.delete(:type)
       @type          = type.to_s.snakecase unless type.nil?
