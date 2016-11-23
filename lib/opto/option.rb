@@ -70,7 +70,7 @@ module Opto
 
       @group         = opts.delete(:group)
       if @group && @group.defaults
-        opts = @group.defaults.merge(opts)
+        opts = @group.defaults.reject{|k,_| [:from, :to].include?(k)}.merge(opts)
       end
 
       @name          = opts.delete(:name).to_s
