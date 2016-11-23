@@ -88,7 +88,7 @@ module Opto
     # @param [String] option_name
     # @return [Opto::Option]
     def option(option_name)
-      options.find { |opt| opt.name == option_name.downcase }
+      options.find { |opt| opt.name == option_name }
     end
 
     # Get a value of a member by option name
