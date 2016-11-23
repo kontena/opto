@@ -67,6 +67,12 @@ module Opto
     #   )
     def initialize(options = {})
       opts           = options.dup
+
+      @group         = opts.delete(:group)
+      if @group && @group.defaults
+        opts = @group.defaults.merge(opts)
+      end
+
       @name          = opts.delete(:name).to_s.downcase
 
       type           = opts.delete(:type)
@@ -76,16 +82,30 @@ module Opto
       @description   = opts.delete(:description)
       @default       = opts.delete(:default)
       val            = opts.delete(:value)
-      @from          = { default: self }.merge(normalize_from_to(opts.delete(:from)))
-      @to            = normalize_from_to(opts.delete(:to))
       @skip_if       = opts.delete(:skip_if)
       @only_if       = opts.delete(:only_if)
       @skip_lambdas  = normalize_ifs(@skip_if)
       @only_lambdas  = normalize_ifs(@only_if)
-      @group         = opts.delete(:group)
+      @from          = { default: self }.merge(normalize_from_to(opts.delete(:from)))
+      @to            = normalize_from_to(opts.delete(:to))
       @type_options  = opts
 
       set_initial(val) if val
+      deep_merge_defaults
+    end
+
+    def deep_merge_defaults
+      return nil unless group && group.defaults
+      if group.defaults[:from]
+        normalize_from_to(group.defaults[:from]).each do |k,v|
+          from[k] ||= v
+        end
+      end
+      if group.defaults[:to]
+        normalize_from_to(group.defaults[:to]).each do |k,v|
+          to[k] ||= v
+        end
+      end
     end
 
     # Hash representation of Opto::Option. Can be passed back to Opto::Option.new
@@ -239,7 +259,7 @@ module Opto
       when Array
         case inputs.first
         when String, Symbol
-          inputs.each_with_object({}) { |o, hash| hash[o.to_s.snakecase.to_sym] = nil }
+          inputs.each_with_object({}) { |o, hash| hash[o.to_s.snakecase.to_sym] = name }
         when Hash
           inputs.each_with_object({}) { |o, hash| o.each { |k,v| hash[k.to_s.snakecase.to_sym] = v } }
         when NilClass
@@ -250,7 +270,7 @@ module Opto
       when Hash
         inputs.each_with_object({}) { |(k, v), hash| hash[k.to_s.snakecase.to_sym] = v }
       when String, Symbol
-        { inputs.to_s.snakecase.to_sym => nil }
+        { inputs.to_s.snakecase.to_sym => name }
       when NilClass
         {}
       else

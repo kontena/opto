@@ -202,9 +202,9 @@ describe Opto::Option do
       it 'can handle an array that has strings/symbols' do
         origins = subject.normalize_from_to([:env, 'default'])
         expect(origins).to have_key(:env)
-        expect(origins[:env]).to be_nil
+        expect(origins[:env]).to eq subject.name
         expect(origins).to have_key(:default)
-        expect(origins[:default]).to be_nil
+        expect(origins[:default]).to eq subject.name
         expect(origins.size).to eq 2
       end
 
@@ -233,8 +233,8 @@ describe Opto::Option do
       end
 
       it 'can handle a lone string/sym' do
-        expect(subject.normalize_from_to(:env)).to eq ({ env: nil })
-        expect(subject.normalize_from_to('env')).to eq ({ env: nil })
+        expect(subject.normalize_from_to(:env)).to eq ({ env: subject.name })
+        expect(subject.normalize_from_to('env')).to eq ({ env: subject.name })
       end
 
       it 'can handle nil' do
@@ -340,6 +340,14 @@ describe Opto::Option do
 
     it 'raises if ifs are not kosher' do
       expect{Opto::Option.new(name: 'foo', type: :string, only_if: 3)}.to raise_error(TypeError)
+    end
+
+    it 'merges from/to defaults from group' do
+      grp = Opto::Group.new(defaults: { from: :env, to: :env})
+      instance = grp.build_option(type: :string, name: 'foo', from: { file: '/tmp/foo.txt' })
+      expect(instance.from[:env]).to eq 'foo'
+      expect(instance.from[:file]).to eq '/tmp/foo.txt'
+      expect(instance.to[:env]).to eq 'foo'
     end
   end
 end

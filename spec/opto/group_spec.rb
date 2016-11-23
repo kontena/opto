@@ -93,5 +93,11 @@ describe Opto::Group do
     expect(instance.size).to eq 3
     expect(instance.last.name).to eq 'blerb'
   end
+
+  it 'merges defaults' do
+    grp = Opto::Group.new(defaults: { type: :string })
+    opt = grp.build_option(name: 'foo')
+    expect(opt.type).to eq 'string'
+  end
 end
 

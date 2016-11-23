@@ -5,24 +5,36 @@ module Opto
   # Most Array instance methods are delegated, such as .map, .each, .find etc.
   class Group
 
-    attr_reader :options
+    using Opto::Extension::HashStringOrSymbolKey
+
+    attr_reader :options, :defaults
 
     extend Forwardable
 
-    # Initialize a new Option Group.
+    # Initialize a new Option Group. You can also pass in :defaults.
+    #
     # @param [Array<Hash,Opto::Option>,Hash,NilClass] opts An array of Option definition hashes or Option objects or a hash like { var_name: { opts } }.
     # @return [Opto::Group]
-    def initialize(opts = nil)
-      case opts
-      when NilClass
-        @options = []
-      when Hash
-        @options = opts.map {|k,v| Option.new({name: k.to_s, group: self}.merge(v))}
-      when Array
-        @options = opts.map {|opt| opt.kind_of?(Opto::Option) ? opt : Option.new(opt.merge(group: self)) }
+    def initialize(*options)
+      if options.size > 0
+        if options.last.kind_of?(Hash) && options.last[:defaults]
+          @defaults = options.pop[:defaults]
+        end
+        @options =
+          case options.first
+          when NilClass
+            []
+          when Hash
+            options.first.map {|k,v| Option.new({name: k.to_s, group: self}.merge(v))}
+          when Array
+            options.first.map {|opt| opt.kind_of?(Opto::Option) ? opt : Option.new(opt.merge(group: self)) }
+          else
+            raise TypeError, "Invalid type #{options.first.class} for Opto::Group.new"
+          end
       else
-        raise TypeError, "Invalid type #{opts.class} for Opto::Group.new"
+        @options = []
       end
+
     end
 
     # Are all options valid? (Option value passes validation)
