@@ -44,6 +44,23 @@ describe Opto::Group do
     expect(instance.options_with_errors.size).to eq 1
   end
 
+  it '#run runs all the setters for valid non-skipped options' do
+    setter = double(:setter) 
+    expect(Opto::Setter).to receive(:for).with(:env).twice.and_return(setter)
+    expect(setter).to receive(:new).with('BAZBAZ', instance_of(Opto::Option)).and_return(setter)
+    expect(setter).to receive(:new).with('DOGDOG', instance_of(Opto::Option)).and_return(setter)
+    expect(setter).to receive(:set).with('baz').and_return(true)
+    expect(setter).to receive(:set).with('dog').and_return(true)
+
+    instance = subject.new(
+      'foo' => {type: :string, value: nil, default: nil, required: true, to: { env: 'FOOFOO' }},
+      'bar' => {type: :string, value: 'bar', default: nil, only_if: 'foo', to: { env: 'BARBAR' }},
+      'baz' => {type: :string, value: 'baz', to: { env: 'BAZBAZ' }},
+      'dog' => {type: :string, value: 'dog', to: { env: 'DOGDOG' }}
+    )
+    instance.run
+  end
+
   it 'converts the options to an array of hashes' do
     instance = subject.new([{type: :string, name: 'foo'}, {type: :integer, name: 'bar', value: 1}])
     arr = instance.to_a

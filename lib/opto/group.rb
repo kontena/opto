@@ -59,6 +59,11 @@ module Opto
       end
     end
 
+    # Runs outputters for all valid non-skipped options
+    def run
+      options.reject(&:skip?).select(&:valid?).each(&:output)
+    end
+
     # Initialize a new Option to this group. Takes the same arguments as Opto::Option
     # @param [Hash] option_definition
     # @return [Opto::Option]

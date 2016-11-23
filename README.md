@@ -7,7 +7,7 @@ An option parser, built for generating options from a YAML file, but can be just
 ## YAML definition examples:
 
 ```yaml
-  - name: "remote_driver "
+  remote_driver:
     type: "enum"
     required: true
     label: "Remote Driver"
@@ -18,7 +18,7 @@ An option parser, built for generating options from a YAML file, but can be just
       - gitlab
       - gogs
 
-  - name: foo.username
+  foo_username:
     type: string
     required: true
     min_length: 1
@@ -27,7 +27,7 @@ An option parser, built for generating options from a YAML file, but can be just
     upcase: true
     env: FOO_USER
 
-  - name: foo.os
+  name: foo_os
     type: enum
     required: true
     can_be_other: true # otherwise value has to be one of the options
@@ -39,14 +39,14 @@ An option parser, built for generating options from a YAML file, but can be just
        label: Ubuntu
        description: Ubuntu Bubuntu
 
-  - name: foo.instances
+  foo_instances:
     type: integer
     required: true
     default: 1
     min: 1
     max: 30
 
-  - name: host.url
+  host_url:
     type: uri
     default: http://localhost:8000
     schemes:
@@ -56,14 +56,14 @@ An option parser, built for generating options from a YAML file, but can be just
 Simple so far. Now let's mix in "resolvers" which can fetch the value from a number of sources or even generate new data:
 
 ```yaml
-  - name: vault_iv
+  vault_iv:
     type: string
     from: 
       random_string:
         length: 64
         charset: ascii_printable
 
-  - name: aws_secret
+  aws_secret:
     type: string
     strip: true # removes any leading / trailing whitespace from a string
     upcase: true # turns the string to upcase
@@ -71,16 +71,30 @@ Simple so far. Now let's mix in "resolvers" which can fetch the value from a num
       env: 'FOOFOO'
       file: /tmp/aws_secret.txt  # if env is not set, try to read it from this file, raises if not readable
 
-  - name: aws_secret
+  aws_secret:
     type: string
     strip: true # removes any leading / trailing whitespace from a string
     upcase: true # turns the string to upcase
     from:
-      file: 
+      file:
         path: /tmp/aws_secret.txt
         ignore_errors: true # if env is not set, try to read it from this file, returns nil if not readable
-      env: 'FOOFOO'  # because the previous returned nil, this one is tried
+      env: FOOFOO  # because the previous returned nil, this one is tried
       random_string: 30 # not there either, generate a random string.
+```
+
+Ok, so what to do with the values? There's setters for that.
+
+```yaml
+  aws_secret:
+    type: string
+    from:
+      env: AWS_TOKEN
+    to:
+      env: AWS_SECRET_TOKEN # once a valid value is set, set it to this variable.
+
+# There aren't any more setters right now, but one could imagine setters such as
+# output to a file, interpolate into a file, run a command, etc.
 ```
 
 ## Conditionals

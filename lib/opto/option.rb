@@ -1,5 +1,6 @@
 require_relative 'type'
 require_relative 'resolver'
+require_relative 'setter'
 require_relative 'extensions/snake_case'
 require_relative 'extensions/hash_string_or_symbol_key'
 
@@ -19,6 +20,7 @@ module Opto
     attr_accessor :required
     attr_accessor :default
     attr_reader   :from
+    attr_reader   :to
     attr_reader   :group
     attr_reader   :skip_if
     attr_reader   :only_if
@@ -33,6 +35,7 @@ module Opto
     #   @option [String] :description Same as label, but more detailed
     #   @option [*] :default Default value for option
     #   @option [String,Symbol,Array<String,Symbol,Hash>,Hash] :from Resolver origins
+    #   @option [String,Symbol,Array<String,Symbol,Hash>,Hash] :to Setter targets
     #   @option [String,Symbol,Array<String,Symbol,Hash>,Hash] :skip_if Conditionals that define if this option should be skipped
     #   @option [String,Symbol,Array<String,Symbol,Hash>,Hash] :only_if Conditionals that define if this option should be included
     #   @option [Opto::Group] :group Parent group reference
@@ -73,7 +76,8 @@ module Opto
       @description   = opts.delete(:description)
       @default       = opts.delete(:default)
       val            = opts.delete(:value)
-      @from          = { default: self }.merge(normalize_origins(opts.delete(:from)))
+      @from          = { default: self }.merge(normalize_from_to(opts.delete(:from)))
+      @to            = normalize_from_to(opts.delete(:to))
       @skip_if       = opts.delete(:skip_if)
       @only_if       = opts.delete(:only_if)
       @skip_lambdas  = normalize_ifs(@skip_if)
@@ -81,7 +85,7 @@ module Opto
       @group         = opts.delete(:group)
       @type_options  = opts
 
-      val ? set_initial(val) : set(resolve)
+      set_initial(val) if val
     end
 
     # Hash representation of Opto::Option. Can be passed back to Opto::Option.new
@@ -96,6 +100,7 @@ module Opto
         description: description,
         default: default,
         from: from.reject { |k,_| k == :default},
+        to: to
       }.merge(type_options).reject { |_,v| v.nil? }
       hash[:skip_if] = skip_if if skip_if
       hash[:only_if] = only_if if only_if
@@ -109,7 +114,6 @@ module Opto
     def set(value)
       @value = handler.sanitize(value)
       validate
-      handler.after_set(self)
       @value
     end
 
@@ -147,10 +151,7 @@ module Opto
     # @return option_value
     def value
       return @value unless @value.nil?
-      unless @tried_resolve
-        @tried_resolve = true
-        set(resolve)
-      end
+      set(resolve)
       @value
     end
 
@@ -158,6 +159,10 @@ module Opto
     # @return [Array<Opto::Resolver>]
     def resolvers
       @resolvers ||= from.map { |origin, hint| Resolver.for(origin).new(hint, self) }
+    end
+
+    def setters
+      @setters ||= to.map { |target, hint| Setter.for(target).new(hint, self) }
     end
 
     # True if this field is defined as required: true
@@ -171,7 +176,9 @@ module Opto
     def resolve
       resolvers.each do |resolver|
         begin
+          resolver.respond_to?(:before) && resolver.before(self)
           result = resolver.resolve
+          resolver.respond_to?(:after) && resolver.after(self)
         rescue StandardError => ex
           raise ex, "Resolver '#{resolver.origin}' for '#{name}' : #{ex.message}"
         end
@@ -181,6 +188,19 @@ module Opto
         end
       end
       nil
+    end
+
+    # Run setters
+    def output
+      setters.each do |setter|
+        begin
+          setter.respond_to?(:before) && setter.before(self)
+          setter.set(value)
+          setter.respond_to?(:after)  && setter.after(self)
+        rescue StandardError => ex
+          raise ex, "Setter '#{setter.target}' for '#{name}' : #{ex.message}"
+        end
+      end
     end
 
     # True if value is valid
@@ -214,27 +234,27 @@ module Opto
       end
     end
 
-    def normalize_origins(origins)
-      case origins
+    def normalize_from_to(inputs)
+      case inputs
       when Array
-        case origins.first
+        case inputs.first
         when String, Symbol
-          origins.each_with_object({}) { |o, hash| hash[o.to_s.snakecase.to_sym] = nil }
+          inputs.each_with_object({}) { |o, hash| hash[o.to_s.snakecase.to_sym] = nil }
         when Hash
-          origins.each_with_object({}) { |o, hash| o.each { |k,v| hash[k.to_s.snakecase.to_sym] = v } }
+          inputs.each_with_object({}) { |o, hash| o.each { |k,v| hash[k.to_s.snakecase.to_sym] = v } }
         when NilClass
           {}
         else
-          raise TypeError, "Invalid format for value sources"
+          raise TypeError, "Invalid format #{inputs.inspect}"
         end
       when Hash
-        origins.each_with_object({}) { |(k, v), hash| hash[k.to_s.snakecase.to_sym] = v }
+        inputs.each_with_object({}) { |(k, v), hash| hash[k.to_s.snakecase.to_sym] = v }
       when String, Symbol
-        { origins.to_s.snakecase.to_sym => nil }
+        { inputs.to_s.snakecase.to_sym => nil }
       when NilClass
         {}
       else
-        raise TypeError, "Invalid format for value sources"
+        raise TypeError, "Invalid format #{inputs.inspect}"
       end
     end
 

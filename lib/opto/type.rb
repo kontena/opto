@@ -86,10 +86,6 @@ module Opto
       @options = Type::GLOBAL_OPTIONS.merge(self.class.const_defined?(:OPTIONS) ? self.class.const_get(:OPTIONS) : {}).merge(options)
     end
 
-    def after_set(option)
-      # do nothing unless defined
-    end
-
     def type
       self.class.type
     end
