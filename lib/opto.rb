@@ -1,8 +1,8 @@
 require "opto/version"
+require 'opto/extensions/snake_case'
+require 'opto/extensions/hash_string_or_symbol_key'
 
 if RUBY_VERSION < '2.1'
-  require 'opto/extensions/snake_case'
-  require 'opto/extensions/hash_string_or_symbol_key'
   using Opto::Extension::SnakeCase
   using Opto::Extension::HashStringOrSymbolKey
 end
