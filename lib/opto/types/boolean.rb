@@ -9,7 +9,7 @@ module Opto
     #   :truthy an array of strings / values that are converted to True.
     #   :nil_is by default false
     #   :blank_is by default false too
-    #   :as by default outputs a string
+    #   :as by default outputs a string. integer outputs a number, true_or_nil outputs true or nil. set to nil to just output whatever is in :true and :false
     #   :true says "true" by default when outputting a string
     #   :false says "false" by default when outputting a string
     class Boolean < Opto::Type
@@ -40,6 +40,8 @@ module Opto
           value ? (options[:true].kind_of?(Fixnum) ? options[:true] : 1) : (options[:false].kind_of?(Fixnum) ? options[:false] : 0)
         when 'boolean'
           value
+        when 'true_or_nil'
+          value ? true : nil
         else
           value ? options[:true] : options[:false]
         end
