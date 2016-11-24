@@ -27,6 +27,8 @@ module Opto
       sanitizer :to_bool do |value|
         if value.nil?
           options[:nil_is]
+        elsif value.kind_of?(TrueClass) || value.kind_of?(FalseClass)
+          value
         elsif value.to_s.strip == ''
           options[:blank_is]
         else
@@ -40,8 +42,6 @@ module Opto
           value ? (options[:true].kind_of?(Fixnum) ? options[:true] : 1) : (options[:false].kind_of?(Fixnum) ? options[:false] : 0)
         when 'boolean'
           value
-        when 'true_or_nil'
-          value ? true : nil
         else
           value ? options[:true] : options[:false]
         end
