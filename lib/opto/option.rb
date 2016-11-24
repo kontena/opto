@@ -227,6 +227,7 @@ module Opto
     # True if value is valid
     # @return [Boolean]
     def valid?
+      return true if skip?
       handler.valid?(value)
     end
 
