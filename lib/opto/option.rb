@@ -171,6 +171,7 @@ module Opto
     # @return option_value
     def value
       return @value unless @value.nil?
+      return nil if skip?
       set(resolve)
       @value
     end
