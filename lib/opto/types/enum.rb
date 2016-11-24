@@ -1,5 +1,11 @@
 require_relative '../type'
-require_relative '../extensions/hash_string_or_symbol_key'
+
+if RUBY_VERSION < '2.1'
+  require 'opto/extensions/snake_case'
+  require 'opto/extensions/hash_string_or_symbol_key'
+  using Opto::Extension::SnakeCase
+  using Opto::Extension::HashStringOrSymbolKey
+end
 
 module Opto
   module Types
@@ -33,7 +39,7 @@ module Opto
     #         description: A friendly furry creature with a tail, says 'woof'
     #   )
     class Enum < Opto::Type
-      using Opto::Extension::HashStringOrSymbolKey
+      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
 
       OPTIONS = {
         options: [],

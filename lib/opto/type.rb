@@ -1,5 +1,9 @@
-require_relative 'extensions/snake_case'
-require_relative 'extensions/hash_string_or_symbol_key'
+if RUBY_VERSION < '2.1'
+  require 'opto/extensions/snake_case'
+  require 'opto/extensions/hash_string_or_symbol_key'
+  using Opto::Extension::SnakeCase
+  using Opto::Extension::HashStringOrSymbolKey
+end
 
 module Opto
   # Defines a type handler. Used as a base from which to inherit in the type handlers.
@@ -10,8 +14,10 @@ module Opto
 
     attr_accessor :options
 
-    using Opto::Extension::SnakeCase
-    using Opto::Extension::HashStringOrSymbolKey
+    unless RUBY_VERSION < '2.1'
+      using Opto::Extension::SnakeCase
+      using Opto::Extension::HashStringOrSymbolKey
+    end
 
     class << self
       def inherited(where)
@@ -48,7 +54,9 @@ module Opto
       #   end
       def validator(name, &block)
         raise TypeError, "Block required" unless block_given?
-        validators << define_method("validate_#{name}", block)
+        define_method("validate_#{name}", &block)
+        validators << "validate_#{name}".to_sym
+        # RUBY_VERSION >= 2.1 would allow validators << define_method("validate_#{name}", block)
       end
 
       def sanitizers
@@ -66,7 +74,8 @@ module Opto
       #   end
       def sanitizer(name, &block)
         raise TypeError, "Block required" unless block_given?
-        sanitizers << define_method("sanitize_#{name}", &block)
+        define_method("sanitize_#{name}", &block)
+        sanitizers << "sanitize_#{name}".to_sym
       end
     end
 

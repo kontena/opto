@@ -1,6 +1,15 @@
 require "opto/version"
+
+if RUBY_VERSION < '2.1'
+  require 'opto/extensions/snake_case'
+  require 'opto/extensions/hash_string_or_symbol_key'
+  using Opto::Extension::SnakeCase
+  using Opto::Extension::HashStringOrSymbolKey
+end
+
 require "opto/option"
 require "opto/group"
+
 require 'yaml'
 
 # An option parser/validator/resolver
@@ -39,3 +48,4 @@ module Opto
   singleton_class.send(:alias_method, :load, :read)
 
 end
+

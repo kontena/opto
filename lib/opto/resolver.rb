@@ -1,4 +1,9 @@
-require_relative 'extensions/snake_case'
+if RUBY_VERSION < '2.1'
+  require 'opto/extensions/snake_case'
+  require 'opto/extensions/hash_string_or_symbol_key'
+  using Opto::Extension::SnakeCase
+  using Opto::Extension::HashStringOrSymbolKey
+end
 
 module Opto
   # Base for resolvers.
@@ -9,7 +14,7 @@ module Opto
   # RandomString, which can generate random strings of defined length.
   class Resolver
 
-    using Opto::Extension::SnakeCase
+    using Opto::Extension::SnakeCase unless RUBY_VERSION < '2.1'
 
     attr_accessor :hint
     attr_accessor :option

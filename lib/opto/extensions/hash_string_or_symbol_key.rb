@@ -16,4 +16,3 @@ module Opto
     end
   end
 end
-

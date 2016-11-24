@@ -1,4 +1,9 @@
-require_relative '../extensions/hash_string_or_symbol_key'
+if RUBY_VERSION < '2.1'
+  require 'opto/extensions/snake_case'
+  require 'opto/extensions/hash_string_or_symbol_key'
+  using Opto::Extension::SnakeCase
+  using Opto::Extension::HashStringOrSymbolKey
+end
 
 module Opto
   module Resolvers
@@ -19,7 +24,7 @@ module Opto
     #   { length: 8, charset: '01' }  Will generate something like:  01001100
     class RandomString < Opto::Resolver
 
-      using Opto::Extension::HashStringOrSymbolKey
+      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
 
       def charset(name)
         case name.to_s

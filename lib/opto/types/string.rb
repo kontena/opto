@@ -1,6 +1,12 @@
 require_relative '../type'
-require_relative '../extensions/hash_string_or_symbol_key'
 require 'base64'
+
+if RUBY_VERSION < '2.1'
+  require 'opto/extensions/snake_case'
+  require 'opto/extensions/hash_string_or_symbol_key'
+  using Opto::Extension::SnakeCase
+  using Opto::Extension::HashStringOrSymbolKey
+end
 
 module Opto
   module Types
@@ -18,7 +24,7 @@ module Opto
     #   - chomp: set to true to remove trailing linefeed
     #   - capitalize: set to true to upcase the first letter
     class String < Opto::Type
-      using Opto::Extension::HashStringOrSymbolKey
+      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
 
       TRANSFORMATIONS = [ :upcase, :downcase, :strip, :chomp, :capitalize ]
 

@@ -10,6 +10,7 @@ describe Opto::Types::Boolean do
       expect(subject.new.sanitize_to_bool(1)).to be_truthy
       expect(subject.new.sanitize_to_bool("yes")).to be_truthy
       expect(subject.new.sanitize_to_bool("fofofoo")).to be_falsey
+      expect(subject.new.sanitize_to_bool(true)).to be_truthy
       expect(subject.new(truthy: ['fofofoo']).sanitize_to_bool("fofofoo")).to be_truthy
     end
 
