@@ -8,15 +8,21 @@ module Opto
       end
 
       def file_path
-        hint.kind_of?(String) ? hint : (hint['path'] || hint[:path])
+        if hint.kind_of?(String)
+          hint
+        elsif hint.kind_of?(Hash) && (hint['path'] || hint[:path])
+          hint['path'] || hint[:path]
+        else
+          raise ArgumentError, "File path not set"
+        end
       end
 
       def resolve
-        raise ArgumentError, "File path not set" unless file_path
         if ignore_errors?
-          ::File.read(hint) rescue nil
+          file_path
+          ::File.read(file_path) rescue nil
         else
-          ::File.read(hint)
+          ::File.read(file_path)
         end
       end
     end
