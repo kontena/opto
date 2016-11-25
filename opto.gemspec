@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Kimmo Lehto"]
   spec.email         = ["info@kontena.io"]
 
-  spec.summary       = "Create validatable and resolvable options from hashes"
-  spec.description   = "Example: Opto.new(type: :string, name: 'foo, min_length: 20, from: { env: 'FOO' }).value"
+  spec.summary       = "Option validator / resolver"
+  spec.description   = "Create validatable and resolvable options from hashes or YAML. Example: Opto.new(type: :string, name: 'FOO', min_length: 20, from: :env).valid?"
   spec.homepage      = "https://github.com/kontena/opto"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
