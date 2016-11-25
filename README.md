@@ -2,35 +2,53 @@
 
 [![Build Status](https://travis-ci.org/kontena/opto.svg?branch=master)](https://travis-ci.org/kontena/opto)
 
-An option parser, built for generating options from a YAML file, but can be just as well used for other things.
+An option parser, built for generating options from YAML based [Kontena](https://github.com/kontena/kontena/) stack
+definition files, but can be just as well used for other things, such as an API input validator.
+
+The values for options can be resolved from files, env-variables, custom interactive prompts, random generators, etc.
+
+The option type handlers can perform validations, such as defining a range or length requirements.
+
+Transformations can be performed on values, such as upcasing strings or removing white space.
+
+Options can have simple conditionals for determining if it needs to be processed or not, an option for defining a database
+password can be processed only if a database has been selected.
+
+Finally the value for the option can be placed to some destination, such as an environment variable or sent to a command.
 
 ## YAML definition examples:
 
 ```yaml
+# Enum type
   remote_driver:
     type: "enum"
     required: true
     label: "Remote Driver"
     description: "Remote Git and Auth scheme"
-    options:  # array of options, will be used as value, label and description
+    options:
       - github
       - bitbucket
       - gitlab
       - gogs
+```
 
+```yaml
+# String validation and transformation
   foo_username:
     type: string
     required: true
     min_length: 1
     max_length: 30
-    strip: true
-    upcase: true
-    env: FOO_USER
+    strip: true   # remove leading / trailing whitespace
+    upcase: true  # make UPCASE
+    env: FOO_USER # read value from ENV variable FOO_USER
+```
 
+```yaml
+# Enum with prettier item descriptions
   name: foo_os
     type: enum
-    required: true
-    can_be_other: true # otherwise value has to be one of the options
+    can_be_other: true # otherwise value has to be one of the options to be valid.
     options:
      - value: coreos
        label: CoreOS
@@ -38,31 +56,41 @@ An option parser, built for generating options from a YAML file, but can be just
      - value: ubuntu
        label: Ubuntu
        description: Ubuntu Bubuntu
+```
 
+```yaml
+# Integer with default value and allowed range
   foo_instances:
     type: integer
-    required: true
     default: 1
     min: 1
     max: 30
+```
 
+```yaml
+# Uri validator
   host_url:
     type: uri
-    default: http://localhost:8000
     schemes:
       - file # only allow file:/// uris
 ```
 
+## Resolvers
+
 Simple so far. Now let's mix in "resolvers" which can fetch the value from a number of sources or even generate new data:
 
 ```yaml
+# Generate random strings
   vault_iv:
     type: string
     from: 
       random_string:
         length: 64
-        charset: ascii_printable
+        charset: ascii_printable # Other charsets include hex, hex_upcase, alphanumeric, etc.
+```
 
+```yaml
+# Try to get value from multiple sources
   aws_secret:
     type: string
     strip: true # removes any leading / trailing whitespace from a string
@@ -76,12 +104,14 @@ Simple so far. Now let's mix in "resolvers" which can fetch the value from a num
     strip: true # removes any leading / trailing whitespace from a string
     upcase: true # turns the string to upcase
     from:
-      file:
+      env: FOOFOO
+      file:  # if env is not set, try to read it from this file, returns nil if not readable
         path: /tmp/aws_secret.txt
-        ignore_errors: true # if env is not set, try to read it from this file, returns nil if not readable
-      env: FOOFOO  # because the previous returned nil, this one is tried
+        ignore_errors: true 
       random_string: 30 # not there either, generate a random string.
 ```
+
+## Setters
 
 Ok, so what to do with the values? There's setters for that.
 
@@ -107,7 +137,7 @@ There's also rudimentary conditional support:
     value: 'hello'
   - name: bar
     type: integer
-    only_if: 
+    only_if:       # only process if 'foo' has the value 'hello'
       - foo: hello
 ```
 
@@ -122,7 +152,7 @@ There's also rudimentary conditional support:
 ```yaml
   - name: bar
     type: integer
-    skip_if: 
+    skip_if:   # same but reverse, do not process if 'foo' has value 'hello'
       - foo: 'hello'
 ```
 
@@ -136,7 +166,7 @@ There's also rudimentary conditional support:
 ```
 
 ```yaml
- # And these work too:
+ # These work too:
 
   - name: bar
     type: integer
@@ -146,11 +176,11 @@ There's also rudimentary conditional support:
 
   - name: bar
     type: integer
-    only_if: foo   # foo is not null
+    only_if: foo   # process if foo is not null, false or 'false'
 
   - name: bar
     type: integer
-    only_if: 
+    only_if:
       - foo   # foo is not null
       - baz   # AND baz is not null
 ```
@@ -217,4 +247,144 @@ end
     - bar: Bar
   from: prompter
 ```
+
+## Subclassing a predefined type handler, setter, etc
+
+```ruby
+class VersionNumber < Opto::Types::String
+  Opto::Type.inherited(self) # need to call Opto::Type.inherited for registering the handler for now.
+
+  OPTIONS = Opto::Types::String::OPTIONS.merge(
+    min_version: nil,
+    max_version: nil
+  )
+
+  validate :min_version do |value|
+    if options[:min_version] && value < options[:min_version]
+      "Minimum version required: #{options[:min_version]}"
+    end
+  end
+
+  validate :max_version do |value|
+    if options[:max_version] && value > options[:max_version]
+      "Maximum version: #{options[:max_version]}, yours is #{value}"
+    end
+  end
+
+  sanitize :remove_build_info do |value|
+    value.split('+').first
+  end
+end
+
+# And to use:
+> opt = Opto::Option.new(type: :version_number, name: 'foo', minimum_version: '1.0.0')
+> opt.value = '0.1.0'
+> opt.valid?
+=> false
+> opt.errors
+=> { :validate_min_version => "Minimum version required: 1.0.0" }
+```
+
+## Default types
+
+Global validations:
+
+```yaml
+  in:  # only allow one of the following values
+    - a
+    - b
+    - c
+```
+
+### boolean
+
+```ruby
+{
+   truthy: ['true', 'yes', '1', 'on', 'enabled', 'enable'], # These strings will be turned into true
+   nil_is: false, # If the value is null, set to false
+   blank_is: false, # If the value is a blank string, set to false
+   false: 'false', # When outputting, emit this value when value is false
+   true: 'true',   # When outputting, emit this value when value is true
+   as: 'string'    # Output a string, can be 'boolean' or 'integer'
+}
+```
+
+### enum
+
+```ruby
+{
+  options: [],  # List of the possible option values
+  can_be_other: false  # Or allow values outside the option list
+}
+```
+
+### integer
+```ruby
+{
+  min: 0, # minimum value, can be negative
+  max: nil, # maximum value
+  nil_is_zero: false # null value will be turned into zero
+}
+```
+
+### string
+```ruby
+{
+  min_length: nil, # minimum length
+  max_length: nil, # maximum length
+  empty_is_nil: true, # if string contains whitespace only, make value null
+  encode_64: false, # encode content to base64
+  decode_64: false, # decode content from base64
+  upcase: false, # convert to UPPERCASE
+  downcase: false, # convert to lowercase
+  strip: false, # remove leading/trailing whitespace,
+  chomp: false, # remove trailing linefeed
+  capitalize: false # convert to Capital case.
+}
+```
+
+### uri
+```ruby
+{
+  schemes: [ 'http', 'https' ] # only http and https urls are considered valid
+}
+```
+
+## Default resolvers
+Hint is the value that gets passed to the resolver when doing for example: `env: FOO` (FOO is the hint)
+
+### env
+Hint is the environment variable name to read from. Defaults to the option's name.
+
+### file
+Hint can be a string containing a path to the file, or a hash that defines `path: 'file_path', ignore_errors: true`
+
+### random_number
+Hint must be a hash containing `min: minimum_number, max: maximum_number`
+
+### random_string
+Hint can be a string/number that defines minimum length. Default charset is 'alphanumeric'
+Hint can also be a hash that defines `length: length_of_generated_string, charset: 'charset_name'`
+
+Defined charsets:
+ * numbers (0-9)
+ * letters (a-z + A-Z)
+ * downcase (a-z)
+ * upcase (A-Z)
+ * alphanumeric (0-9 + a-z + A-Z)
+ * hex (0-9 + a-f)
+ * hex_upcase (0-9 + A-F)
+ * base64 (base64 charset (length has to be divisible by four when using base64))
+ * ascii_printable (all printable ascii chars)
+ * or a set of characters, for example: { length: 8, charset: '01' }  Will generate something like:  01001100
+
+### random_uuid
+Ignores hint completely.
+
+Output is a 'random' UUID generated by `SecureRandom.uuid`, such as `78b6decf-e312-45a1-ac8c-d562270036ba`
+
+## Default setters
+
+### env
+Works exactly the same as env resolver, except in reverse.
 
