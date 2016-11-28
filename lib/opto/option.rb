@@ -93,7 +93,7 @@ module Opto
       @only_if       = opts.delete(:only_if)
       @skip_lambdas  = normalize_ifs(@skip_if)
       @only_lambdas  = normalize_ifs(@only_if)
-      @from          = { default: self }.merge(normalize_from_to(opts.delete(:from)))
+      @from          = normalize_from_to(opts.delete(:from))
       @to            = normalize_from_to(opts.delete(:to))
       @type_options  = opts
 
@@ -186,7 +186,7 @@ module Opto
     # Accessor to defined resolvers for this option.
     # @return [Array<Opto::Resolver>]
     def resolvers
-      @resolvers ||= from.map { |origin, hint| Resolver.for(origin).new(hint, self) }
+      @resolvers ||= from.merge(default: self).map { |origin, hint| Resolver.for(origin).new(hint, self) }
     end
 
     def setters
