@@ -4,6 +4,6 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
-  gem 'byebug', require: false
-  gem 'simplecov', require: false
+  gem 'byebug', require: false, platforms: :ruby
+  gem 'simplecov', require: false, platforms: :ruby
 end
