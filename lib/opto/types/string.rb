@@ -23,6 +23,7 @@ module Opto
     #   - strip: set to true to remove leading and trailing whitespace
     #   - chomp: set to true to remove trailing linefeed
     #   - capitalize: set to true to upcase the first letter
+    #   - hexdigest: valid options: md5, sha1, sha256, sha384, sha512 and nil/false. generate an md5/sha1/etc hexdigest from the value.
     class String < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
 
@@ -32,6 +33,7 @@ module Opto
         min_length: nil,
         max_length: nil,
         empty_is_nil: true,
+        hexdigest: false,
         encode_64: false,
         decode_64: false
       }.merge(Hash[*TRANSFORMATIONS.flat_map {|tr| [tr, false]}])
@@ -43,6 +45,30 @@ module Opto
 
       sanitizer :decode_64 do |value|
         (options[:decode_64] && value) ? Base64.decode64(value) : value
+      end
+
+      sanitizer :hexdigest do |value|
+        case options[:hexdigest]
+        when 'md5'
+          require 'digest/md5'
+          Digest::MD5.hexdigest(value)
+        when 'sha1'
+          require 'digest/sha1'
+          Digest::SHA1.hexdigest(value)
+        when 'sha256'
+          require 'digest/sha2'
+          Digest::SHA256.hexdigest(value)
+        when 'sha384'
+          require 'digest/sha2'
+          Digest::SHA384.hexdigest(value)
+        when 'sha512'
+          require 'digest/sha2'
+          Digest::SHA512.hexdigest(value)
+        when NilClass, FalseClass
+          value
+        else
+          raise TypeError, "Invalid hexdigest, valid options: md5, sha1, sha256, sha384, sha512 and nil/false"
+        end
       end
 
       TRANSFORMATIONS.each do |transform|
