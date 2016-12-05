@@ -21,8 +21,34 @@ module Opto
       OPTIONS = {
         min: 0,
         max: nil,
+        eval: true,
         nil_is_zero: false
       }
+
+      sanitizer :eval do |value|
+        if value && options[:eval]
+          val = value.to_s.gsub(/(?<!\$)\$(?!\$)\{?\w+\}?/) do |v|
+            var = v.tr('${}', '')
+            if option.group.nil? || option.group.option(var).nil?
+              raise RuntimeError, "Variable #{var} not declared"
+            end
+            if option.value_of(var).nil?
+              raise RuntimeError, "No value for #{var}, note that the order is meaningful"
+            end
+            option.value_of(var)
+          end
+          val = val.gsub(/\s+/, "")
+          if val =~ /\A\d+\z/
+            val
+          elsif val =~ /\A[\(\)\-\+\/\*0-9]+\z/
+            eval(val)
+          else
+            raise RuntimeError, "Syntax error: '#{value}' does not look like a numer or a calculation"
+          end
+        else
+          value
+        end
+      end
 
       sanitizer :to_i do |value|
         value.nil? ? (options[:nil_is_zero] ? 0 : nil) : value.to_i

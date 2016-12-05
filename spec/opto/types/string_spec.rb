@@ -89,6 +89,34 @@ describe Opto::Types::String do
     end
   end
 
+  context 'interpolation' do
+    it 'can interpolate vars into strings' do
+      group = Opto::Group.new
+      opt_1 = group.build_option(type: :string, value: "foo", name: 'foo_string')
+      opt_2 = group.build_option(type: :string, value: "${foo_string}bar", name: 'foobar_string')
+      instance = subject.new(option: opt_2)
+      expect(opt_2.value).to eq 'foobar'
+    end
+
+    it 'can skip interpolation' do
+      group = Opto::Group.new
+      opt_1 = group.build_option(type: :string, value: "foo", name: 'foo_string')
+      opt_2 = group.build_option(type: :string, value: "${foo_string}bar", interpolate: false, name: 'foobar_string')
+      instance = subject.new(option: opt_2)
+      expect(opt_2.value).to eq '${foo_string}bar'
+    end
+
+    it 'raises if option is not in a group' do
+      expect{Opto::Option.new(type: :string, value: "${foo_string}bar", name: 'foobar_string')}.to raise_error(RuntimeError)
+    end
+
+    it 'raises if referenced option is nil' do
+      group = Opto::Group.new
+      opt_1 = group.build_option(type: :string, value: nil, name: 'foo_string')
+      expect{group.build_option(type: :string, value: "${foo_string}bar", name: 'foobar_string')}.to raise_error(RuntimeError)
+    end
+  end
+
 end
 
 

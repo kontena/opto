@@ -13,7 +13,7 @@ module Opto
       required: true
     }
 
-    attr_accessor :options
+    attr_accessor :option, :options
 
     unless RUBY_VERSION < '2.1'
       using Opto::Extension::SnakeCase
@@ -93,6 +93,7 @@ module Opto
     end
 
     def initialize(options = {})
+      @option = options.delete(:option)
       @options = Type::GLOBAL_OPTIONS.merge(self.class.const_defined?(:OPTIONS) ? self.class.const_get(:OPTIONS) : {}).merge(options)
     end
 
