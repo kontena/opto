@@ -31,6 +31,11 @@ describe Opto::Types::Integer do
       expect(opt.value).to eq 9
     end
 
+    it 'can be made to not eval' do
+      opt = Opto::Option.new(type: :integer, value: "3*(1+2)", eval: false, name: 'foo')
+      expect(opt.value).to eq 3 # "3*(1+2)".to_i => 3
+    end
+
     it 'can perform simple calculations with variables' do
       group = Opto::Group.new
       opt_1 = group.build_option(type: :string, value: "4", name: 'foo_string')
