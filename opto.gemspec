@@ -10,12 +10,10 @@ Gem::Specification.new do |spec|
   spec.email         = ["info@kontena.io"]
 
   spec.summary       = "Option validator / resolver"
-  spec.description   = "Create validatable and resolvable options from hashes or YAML. Example: Opto.new(type: :string, name: 'FOO', min_length: 20, from: :env).valid?"
+  spec.description   = "Create validatable and resolvable options from hashes or YAML"
   spec.homepage      = "https://github.com/kontena/opto"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.bindir        = "bin"
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.12"
