@@ -49,7 +49,8 @@ require 'opto'
     max_length: 30
     strip: true   # remove leading / trailing whitespace
     upcase: true  # make UPCASE
-    env: FOO_USER # read value from ENV variable FOO_USER
+    from:
+      env: FOO_USER # read value from ENV variable FOO_USER
 ```
 
 ```yaml
