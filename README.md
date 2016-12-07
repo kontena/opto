@@ -340,6 +340,7 @@ Global validations:
 {
   min_length: nil, # minimum length
   max_length: nil, # maximum length
+  hexdigest: nil,  # hexdigest output. options: md5, sha1, sha256, sha384 or sha512.
   empty_is_nil: true, # if string contains whitespace only, make value null
   encode_64: false, # encode content to base64
   decode_64: false, # decode content from base64
