@@ -90,6 +90,13 @@ describe Opto::Option do
 
       before(:each) { allow(type).to receive(:valid?).and_return(true) }
 
+      it 'adds option name to handler error message' do
+        instance = klass.new(base_opts.merge(default: nil, value: nil, type: 'foo'))
+        expect{instance.handler}.to raise_error(NameError) do |ex|
+          expect(ex.message).to start_with(instance.name)
+        end
+      end
+
       it 'gets a type handler from Opto::Type' do
         expect(Opto::Type).to receive(:for).with('string').and_return(type)
         expect(type).to receive(:new).with(hash_including(strip: true)).and_return(type)
