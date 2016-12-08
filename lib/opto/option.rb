@@ -172,6 +172,8 @@ module Opto
     # @return [Opto::Type]
     def handler
       @handler ||= Type.for(type).new(type_options)
+    rescue StandardError => ex
+      raise ex, "#{name}: #{ex.message}"
     end
 
     # The value of this option. Will try to run resolvers.
