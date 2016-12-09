@@ -157,6 +157,7 @@ module Opto
     # Get a value of another Opto::Group member
     # @param [String] option_name
     def value_of(option_name)
+      return value if option_name == self.name
       group.nil? ? nil : group.value_of(option_name)
     end
 
