@@ -26,7 +26,7 @@ module Opto
           option.value_of(var)
         end.gsub(/\s+/, "")
 
-        if interpolated_hint =~ /\A[\(\)\-\+\/\*0-9]+\z/
+        if interpolated_hint =~ /\A[\(\)\-\+\/\*0-9\.]+\z/
           eval(interpolated_hint)
         else
           raise TypeError, "Syntax error: '#{interpolated_hint}' does not look like a number or a calculation"
