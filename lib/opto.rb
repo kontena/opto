@@ -24,7 +24,7 @@ module Opto
       else
         Group.new(opts)
       end
-    when Array
+    when ::Array
       if opts.all? {|o| o.kind_of?(Hash) }
         Group.new(opts)
       else
