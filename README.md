@@ -92,7 +92,7 @@ Simple so far. Now let's mix in "resolvers" which can fetch the value from a num
 # Generate random strings
   vault_iv:
     type: string
-    from: 
+    from:
       random_string:
         length: 64
         charset: ascii_printable # Other charsets include hex, hex_upcase, alphanumeric, etc.
@@ -116,7 +116,7 @@ Simple so far. Now let's mix in "resolvers" which can fetch the value from a num
       env: FOOFOO
       file:  # if env is not set, try to read it from this file, returns nil if not readable
         path: /tmp/aws_secret.txt
-        ignore_errors: true 
+        ignore_errors: true
       random_string: 30 # not there either, generate a random string.
 ```
 
@@ -151,10 +151,10 @@ There's also rudimentary conditional support:
 ```
 
 ```ruby
- group.option('bar').skip? 
+ group.option('bar').skip?
  => false
  group.option('foo').value = 'world'
- group.option('bar').skip? 
+ group.option('bar').skip?
  => true
 ```
 
@@ -167,10 +167,10 @@ There's also rudimentary conditional support:
 
 ```ruby
  group.option('foo').value = 'world'
- group.option('bar').skip? 
+ group.option('bar').skip?
  => false
  group.option('foo').value = 'hello'
- group.option('bar').skip? 
+ group.option('bar').skip?
  => true
 ```
 
@@ -179,7 +179,7 @@ There's also rudimentary conditional support:
 
   - name: bar
     type: integer
-    skip_if: 
+    skip_if:
       - foo: hello # AND
       - baz: world
 
@@ -357,6 +357,19 @@ Global validations:
 ```ruby
 {
   schemes: [ 'http', 'https' ] # only http and https urls are considered valid
+}
+```
+
+### array
+```ruby
+{
+  split: ',', # Use this pattern to split an incoming string into an array
+  join: false, # Set to a pattern such as ',' to output a comma separated string
+  empty_is_nil: false, # When true, an empty array will become nil
+  sort: false, # Sort the array before output
+  uniq: false, # Remove duplicates before output
+  count: false, # Instead of outputting the array, output the array size
+  compact: false # Remove nils before output
 }
 ```
 
