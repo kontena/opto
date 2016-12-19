@@ -91,8 +91,6 @@ module Opto
       val            = opts.delete(:value)
       @skip_if       = opts.delete(:skip_if)
       @only_if       = opts.delete(:only_if)
-      @skip_lambdas  = normalize_ifs(@skip_if)
-      @only_lambdas  = normalize_ifs(@only_if)
       @from          = normalize_from_to(opts.delete(:from))
       @to            = normalize_from_to(opts.delete(:to))
       @type_options  = opts
@@ -149,8 +147,9 @@ module Opto
     # Returns true if this field should not be processed because of the conditionals
     # @return [Boolean]
     def skip?
-      return true if     @skip_lambdas.any? { |s| s.call(self) }
-      return true unless @only_lambdas.all? { |s| s.call(self) }
+      return false if group.nil?
+      return true if group.any_true?(skip_if)
+      return true unless group.all_true?(only_if)
       false
     end
 
@@ -245,25 +244,6 @@ module Opto
     # @return [Hash]
     def errors
       handler.errors
-    end
-
-    def normalize_ifs(ifs)
-      case ifs
-      when NilClass
-        []
-      when ::Array
-        ifs.map do |iff|
-          lambda { |opt| !opt.value_of(iff).nil? }
-        end
-      when Hash
-        ifs.each_with_object([]) do |(k, v), arr|
-          arr << lambda { |opt| opt.value_of(k.to_s) == v }
-        end
-      when String, Symbol
-        [lambda { |opt| !opt.value_of(ifs.to_s).nil? }]
-      else
-        raise TypeError, "Invalid syntax for if"
-      end
     end
 
     def normalize_from_to(inputs)

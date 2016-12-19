@@ -107,6 +107,34 @@ module Opto
       opt.nil? ? nil : opt.value
     end
 
+    def any_true?(conditions)
+      normalize_ifs(conditions).any? { |s| s.call(self) == true }
+    end
+
+    def all_true?(conditions)
+      normalize_ifs(conditions).all? { |s| s.call(self) == true }
+    end
+
+    def normalize_ifs(ifs)
+      case ifs
+      when NilClass
+        []
+      when ::Array
+        ifs.map do |iff|
+          lambda { |grp| !grp.value_of(iff).nil? }
+        end
+      when Hash
+        ifs.each_with_object([]) do |(k, v), arr|
+          arr << lambda { |grp| grp.value_of(k.to_s) == v }
+        end
+      when String, Symbol
+        [lambda { |grp| !grp.value_of(ifs.to_s).nil? }]
+      else
+        raise TypeError, "Invalid syntax for conditional"
+      end
+    end
+
+
     def_delegators :@options, *(::Array.instance_methods - [:__send__, :object_id, :to_h, :to_a, :is_a?, :kind_of?, :instance_of?])
   end
 end
