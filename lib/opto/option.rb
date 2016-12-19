@@ -171,7 +171,7 @@ module Opto
     # Access the Opto::Type handler for this option
     # @return [Opto::Type]
     def handler
-      @handler ||= Type.for(type).new(type_options)
+      @handler ||= Type.for(type).new(type_options.merge(option: self))
     rescue StandardError => ex
       raise ex, "#{name}: #{ex.message}"
     end

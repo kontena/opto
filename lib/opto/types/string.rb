@@ -30,6 +30,7 @@ module Opto
       TRANSFORMATIONS = [ :upcase, :downcase, :strip, :chomp, :capitalize ]
 
       OPTIONS = {
+        interpolate: true,
         min_length: nil,
         max_length: nil,
         empty_is_nil: true,
@@ -38,6 +39,22 @@ module Opto
         decode_64: false
       }.merge(Hash[*TRANSFORMATIONS.flat_map {|tr| [tr, false]}])
 
+      sanitizer :interpolate do |value|
+        if !options[:interpolate] || option.nil?
+          value
+        else
+          value.to_s.gsub(/(?<!\$)\$(?!\$)\{?\w+\}?/) do |v|
+            var = v.tr('${}', '')
+            if option.group.nil? || option.group.option(var).nil?
+              raise RuntimeError, "Variable #{var} not declared"
+            end
+            if option.value_of(var).nil?
+              raise RuntimeError, "No value for #{var}, note that the order is meaningful"
+            end
+            option.value_of(var)
+          end
+        end
+      end
 
       sanitizer :encode_64 do |value|
         (options[:encode_64] && value) ? Base64.encode64(value) : value
