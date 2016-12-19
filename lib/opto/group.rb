@@ -34,7 +34,7 @@ module Opto
             []
           when Hash
             options.first.map {|k,v| Option.new({name: k.to_s, group: self}.merge(v))}
-          when Array
+          when ::Array
             options.first.map {|opt| opt.kind_of?(Opto::Option) ? opt : Option.new(opt.merge(group: self)) }
           else
             raise TypeError, "Invalid type #{options.first.class} for Opto::Group.new"
@@ -107,6 +107,6 @@ module Opto
       opt.nil? ? nil : opt.value
     end
 
-    def_delegators :@options, *(Array.instance_methods - [:__send__, :object_id, :to_h, :to_a, :is_a?, :kind_of?, :instance_of?])
+    def_delegators :@options, *(::Array.instance_methods - [:__send__, :object_id, :to_h, :to_a, :is_a?, :kind_of?, :instance_of?])
   end
 end

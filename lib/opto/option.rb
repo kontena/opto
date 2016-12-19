@@ -10,7 +10,7 @@ if RUBY_VERSION < '2.1'
 end
 
 module Opto
-  # What is an option? It's like a variable that has a value, which can be validated or 
+  # What is an option? It's like a variable that has a value, which can be validated or
   # manipulated on creation. The value can be resolved from a number of origins, such as
   # an environment variable or random string generator.
   class Option
@@ -57,7 +57,7 @@ module Opto
     #     description: 'Enter a name for your cat',
     #     from:
     #       env: 'CAT_NAME'
-    #     only_if: 
+    #     only_if:
     #       pet: 'cat'
     #     min_length: 2
     #     max_length: 20
@@ -251,7 +251,7 @@ module Opto
       case ifs
       when NilClass
         []
-      when Array
+      when ::Array
         ifs.map do |iff|
           lambda { |opt| !opt.value_of(iff).nil? }
         end
@@ -268,7 +268,7 @@ module Opto
 
     def normalize_from_to(inputs)
       case inputs
-      when Array
+      when ::Array
         case inputs.first
         when String, Symbol
           inputs.each_with_object({}) { |o, hash| hash[o.to_s.snakecase.to_sym] = name }

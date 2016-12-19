@@ -19,7 +19,7 @@ module Opto
     #   Opto::Option.new(
     #     name: 'foo',
     #     type: 'enum',
-    #     options: 
+    #     options:
     #       - foo
     #       - bar
     #       - cat
@@ -76,12 +76,12 @@ module Opto
           options.each_with_object([]) do |(key, value), array|
             array << { value: key, label: key, description: value }
           end
-        when Array
+        when ::Array
           case options.first
           when Hash
             options.each do |opt|
               if opt[:value].nil? || opt[:description].nil?
-                raise TypeError, "Option definition requires value and description and can have label when using hash syntax" 
+                raise TypeError, "Option definition requires value and description and can have label when using hash syntax"
               end
             end
             options
