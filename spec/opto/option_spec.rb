@@ -17,7 +17,7 @@ describe Opto::Option do
     let(:base_opts) { { name: 'foo', type: 'string', from: { env: 'FOOENV' }, description: 'foodesc', strip: true, value: 'val', default: 'def', to: { env: 'BARENV' } } }
     let(:klass) { described_class }
     let(:subject) { klass.new(base_opts) }
- 
+
     describe '#to_h' do
       it 'has a full set of keys/values' do
         hash = subject.to_h
@@ -282,7 +282,7 @@ describe Opto::Option do
   end
 
   context '#group_member' do
-    let(:group) do 
+    let(:group) do
       Opto::Group.new(
         [
           { name: 'foo', type: :string },
@@ -310,6 +310,7 @@ describe Opto::Option do
     end
 
     it 'knows when to skip' do
+      puts group.to_h(values_only: true).inspect
       expect(group.option('skip_if_foo').skip?).to be_falsey
       group.option('foo').value = 'baz'
       expect(group.option('skip_if_foo').skip?).to be_truthy
@@ -339,10 +340,6 @@ describe Opto::Option do
       expect(group.option('only_if_bar_and_foo').skip?).to be_falsey
       group.option('foo').value = nil
       expect(group.option('only_if_bar_and_foo').skip?).to be_truthy
-    end
-
-    it 'raises if ifs are not kosher' do
-      expect{Opto::Option.new(name: 'foo', type: :string, only_if: 3)}.to raise_error(TypeError)
     end
 
     it 'merges from/to defaults from group' do
