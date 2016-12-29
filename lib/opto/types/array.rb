@@ -35,6 +35,8 @@ module Opto
           value
         elsif value.kind_of?(::String)
           value.split(options[:split])
+        elsif value.nil?
+          []
         else
           [value]
         end

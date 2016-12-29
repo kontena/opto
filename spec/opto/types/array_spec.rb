@@ -47,5 +47,10 @@ describe Opto::Types::Array do
     it 'can count' do
       expect(subject.new(count: true).sanitize_output(["abc", "cde", "bcd"])).to eq 3
     end
+
+    it 'should have an empty array initially' do
+      arr = Opto::Option.new(type: :array, name: 'array')
+      expect(arr.value).to be_empty
+    end
   end
 end
