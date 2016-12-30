@@ -9,6 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Kimmo Lehto"]
   spec.email         = ["info@kontena.io"]
 
+  spec.licenses      = ['Apache-2.0']
+
   spec.summary       = "Option validator / resolver"
   spec.description   = "Create validatable and resolvable options from hashes or YAML"
   spec.homepage      = "https://github.com/kontena/opto"
