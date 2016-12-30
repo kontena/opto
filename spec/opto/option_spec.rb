@@ -310,7 +310,6 @@ describe Opto::Option do
     end
 
     it 'knows when to skip' do
-      puts group.to_h(values_only: true).inspect
       expect(group.option('skip_if_foo').skip?).to be_falsey
       group.option('foo').value = 'baz'
       expect(group.option('skip_if_foo').skip?).to be_truthy
