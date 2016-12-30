@@ -8,6 +8,14 @@ module Opto
           super(key.to_s) || super(key.to_sym)
         end
 
+        def has_key?(key)
+          if key.nil?
+            super(nil)
+          else
+            super(key.to_s) || super(key.to_sym)
+          end
+        end
+
         def delete(key)
           return nil if key.nil?
           super(key) || super(key.to_s) || super(key.to_sym)

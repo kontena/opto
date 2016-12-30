@@ -1,3 +1,4 @@
+require 'opto/option'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
@@ -125,7 +126,58 @@ module Opto
         end
       when Hash
         ifs.each_with_object([]) do |(k, v), arr|
-          arr << lambda { |grp| grp.value_of(k.to_s) == v }
+          if v.kind_of?(Hash)
+            if v.has_key?(:lt)
+              arr << lambda { |grp| grp.value_of(k.to_s) < v[:lt] }
+            end
+
+            if v.has_key?(:lte)
+              arr << lambda { |grp| grp.value_of(k.to_s) <= v[:lte] }
+            end
+
+            if v.has_key?(:gt)
+              arr << lambda { |grp| grp.value_of(k.to_s) > v[:gt] }
+            end
+
+            if v.has_key?(:gte)
+              arr << lambda { |grp| grp.value_of(k.to_s) > v[:gte] }
+            end
+
+            if v.has_key?(:eq)
+              arr << lambda { |grp| grp.value_of(k.to_s) == v[:eq] }
+            end
+
+            if v.has_key?(:ne)
+              arr << lambda { |grp| grp.value_of(k.to_s) != v[:ne] }
+            end
+
+            if v.has_key?(:start_with)
+              arr << lambda { |grp| grp.value_of(k.to_s).to_s.start_with?(v[:start_with]) }
+            end
+
+            if v.has_key?(:end_with)
+              arr << lambda { |grp| grp.value_of(k.to_s).to_s.end_with?(v[:end_with]) }
+            end
+
+            if v.has_key?(:contain)
+              arr << lambda { |grp| grp.value_of(k.to_s).kind_of?(::Array) ? grp.value_of(k.to_s).include?(v[:contain]) : grp.value_of(k.to_s).to_s.include?(v[:contain]) }
+            end
+
+            if v.has_key?(:any_of)
+              arr << lambda do |grp|
+                if v[:any_of].kind_of?(String)
+                  arr = v[:any_of].split(",")
+                elsif v[:any_of].kind_of?(::Array)
+                  arr = v[:any_of]
+                else
+                  raise TypeError, "Invalid list for 'any_of'. Expected: Array or a comma separated string"
+                end
+                arr.include?(grp.value_of(k.to_s))
+              end
+            end
+          else
+            arr << lambda { |grp| grp.value_of(k.to_s) == v }
+          end
         end
       when String, Symbol
         [lambda { |grp| !grp.value_of(ifs.to_s).nil? }]
