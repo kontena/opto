@@ -569,8 +569,6 @@ group.option('str').resolve
 When an "else" is not defined and none of the conditions match, a null value will be returned.
 
 The syntax for conditionals and complex conditionals is documented above in the chapter about conditionals.
-```
-
 
 ## Default setters
 
