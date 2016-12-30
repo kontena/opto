@@ -11,7 +11,7 @@ The option type handlers can perform validations, such as defining a range or le
 
 Transformations can be performed on values, such as upcasing strings or removing white space.
 
-Options can have simple conditionals for determining if it needs to be processed or not, an option for defining a database
+Options can have simple conditionals for determining if it needs to be processed or not, for example: an option for defining a database
 password can be processed only if a database has been selected.
 
 Finally the value for the option can be placed to some destination, such as an environment variable or sent to a command.
@@ -138,7 +138,7 @@ Ok, so what to do with the values? There's setters for that.
 
 ## Conditionals
 
-There's also rudimentary conditional support:
+There's also support for conditionals
 
 ```yaml
   - name: foo
@@ -194,7 +194,93 @@ There's also rudimentary conditional support:
       - baz   # AND baz is not null
 ```
 
-Pretty nifty, right?
+### Complex conditionals
+
+You can define more complicated conditionals by supplying a hash instead of a value:
+
+```yaml
+# value. same as foo == 5
+only_if:
+  foo: 5
+```
+
+```yaml
+# hash. same as foo > 5 && foo <= 10
+only_if:
+  foo:
+    gt: 5
+    lte: 10
+```
+
+### Complex conditional operators
+
+#### `lt`, `lte`
+
+less than / less than or equal to
+
+#### `gt`, `gte`
+
+greater than / greater than or equal to
+
+#### `eq`, `ne`
+
+equals / not equals
+
+#### `start_with`, `end_with`
+
+"foobar" starts with "foo" and ends with "bar".
+
+#### `contain`
+
+Can be used for strings and arrays:
+
+```yaml
+arr:
+  type: array
+  value:
+    - a
+    - b
+    - c
+
+str:
+  type: string
+  value: foobar
+
+x:
+  type: boolean
+  from:
+    condition:
+      - if:
+        arr:
+          contain: b
+        str:
+          contain: b
+        then: true
+      - else: false
+      -
+# group.value_of('x')
+# => true
+```
+
+#### `any_of`
+
+true when the value is one of the supplied values. Input is either a comma separated string or an array.
+
+```yaml
+foo:
+  skip_if:
+    bar:
+      any_of: foo,baz
+```
+
+```yaml
+foo:
+  skip_if:
+    bar:
+      any_of:
+        - foo
+        - baz
+```
 
 ## Examples
 
@@ -444,6 +530,45 @@ greeting:
 
 # group.value_of('greeting') => "Hello, world!"
 ```
+
+### condition
+
+Hint is an array containing if/then/elsif/else definitions. Sets the value based on the values of other variables.
+
+Example:
+```yaml
+int:
+  type: integer
+  value: 5
+
+str:
+  type: string
+  from:
+    condition:
+      - if:
+          int: 5
+        then: "five"
+      - elsif:
+          int: 6
+        then: "six"
+      - else: "not five or six"
+```
+
+```ruby
+group.option('int').set(4)
+group.option('str').resolve
+=> "not five or six"
+group.option('int').set(5)
+group.option('str').resolve
+=> "five"
+group.option('int').set(6)
+group.option('str').resolve
+=> "six"
+```
+
+When an "else" is not defined and none of the conditions match, a null value will be returned.
+
+The syntax for conditionals and complex conditionals is documented above in the chapter about conditionals.
 
 ## Default setters
 
