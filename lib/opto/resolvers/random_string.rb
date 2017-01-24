@@ -1,31 +1,26 @@
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   module Resolvers
     # Generates a random string.
     #
-    # Requires at least  :length. 
-    # Also accepts :charset which can be one of: 
-    # - numbers (0-9), 
-    # - letters (a-z + A-Z), 
-    # - downcase (a-z), 
+    # Requires at least  :length.
+    # Also accepts :charset which can be one of:
+    # - numbers (0-9),
+    # - letters (a-z + A-Z),
+    # - downcase (a-z),
     # - upcase (A-Z),
-    # - alphanumeric (0-9 + a-z + A-Z), 
-    # - hex (0-9 + a-f), 
-    # - hex_upcase (0-9 + A-F), 
+    # - alphanumeric (0-9 + a-z + A-Z),
+    # - hex (0-9 + a-f),
+    # - hex_upcase (0-9 + A-F),
     # - base64 (base64 charset (length has to be divisible by four when using base64)),
     #-  ascii_printable (all printable ascii chars)
     # - or a set of characters, for example:
     #   { length: 8, charset: '01' }  Will generate something like:  01001100
     class RandomString < Opto::Resolver
 
-      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+      using Opto::Extension::HashStringOrSymbolKey
 
       def charset(name)
         case name.to_s
@@ -56,7 +51,7 @@ module Opto
       end
 
       def resolve
-        if hint.kind_of?(Hash) 
+        if hint.kind_of?(Hash)
           if hint[:length].nil?
             raise ArgumentError, "Invalid settings for random string. Required: length, optional: charset. Charsets : numbers, letters, alphanumeric, hex, base64, ascii_printable and X-Y range."
           end

@@ -2,11 +2,6 @@ require_relative '../type'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   module Types
     # A number.
@@ -16,7 +11,7 @@ module Opto
     #   :max - maximum allowed value
     #   :nil_is_zero : set to true if you want to turn a null value into 0
     class Integer < Opto::Type
-      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+      using Opto::Extension::HashStringOrSymbolKey
 
       OPTIONS = {
         min: 0,

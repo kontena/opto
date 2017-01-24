@@ -2,11 +2,6 @@ require "opto/version"
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 require "opto/option"
 require "opto/group"
 
@@ -15,6 +10,9 @@ require 'yaml'
 # An option parser/validator/resolver
 #
 module Opto
+  using Opto::Extension::SnakeCase
+  using Opto::Extension::HashStringOrSymbolKey
+
   # Initialize a new Opto::Option (when input is hash) or an Opto::Group (when input is an array of hashes)
   def self.new(opts)
     case opts

@@ -1,11 +1,6 @@
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   module Resolvers
     # Allows setting the value conditionally based on other variables
@@ -34,7 +29,7 @@ module Opto
     # If you don't define an else, a null will be returned when no conditions match.
     class Condition < Opto::Resolver
 
-      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+      using Opto::Extension::HashStringOrSymbolKey
 
       class HashCond
         attr_reader :condition

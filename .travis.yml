@@ -1,9 +1,7 @@
 language: ruby
 rvm:
-  - 2.0.0-p648
   - 2.1.8
   - 2.2.3
-  - 2.3.1
   - 2.3.3
   - 2.4.0
   - jruby-9.1.5.0
@@ -18,4 +16,4 @@ deploy:
   gem: opto
   on:
     tags: true
-    rvm: 2.3.1
+    rvm: 2.4.0

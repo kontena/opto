@@ -1,11 +1,7 @@
 require_relative '../spec_helper'
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
 
 class SnakeTest
-  using Opto::Extension::SnakeCase unless RUBY_VERSION < '2.1'
+  using Opto::Extension::SnakeCase
 
   def self.snakeize(string)
     string.snakecase
@@ -13,7 +9,7 @@ class SnakeTest
 end
 
 class FlexyHashTest
-  using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+  using Opto::Extension::HashStringOrSymbolKey
 
   def initialize(key, value)
     @hash = { key => value }
