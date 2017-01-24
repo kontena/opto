@@ -1,8 +1,4 @@
 require_relative '../type'
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
 
 module Opto
   module Types
@@ -17,7 +13,7 @@ module Opto
     #   - compact: when true, removes nils and blanks
     #   - count: when true, the output is the count of items in the array
     class Array < Opto::Type
-      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+      using Opto::Extension::HashStringOrSymbolKey
 
 
       OPTIONS = {

@@ -1,24 +1,19 @@
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
-
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
+require 'opto/extensions/symbolize_keys'
 
 module Opto
   # Defines a type handler. Used as a base from which to inherit in the type handlers.
   class Type
+    using Opto::Extension::HashStringOrSymbolKey
+    using Opto::Extension::SnakeCase
+    using Opto::Extension::SymbolizeKeys
+
     GLOBAL_OPTIONS = {
       required: true
     }
 
     attr_accessor :options
-
-    unless RUBY_VERSION < '2.1'
-      using Opto::Extension::SnakeCase
-      using Opto::Extension::HashStringOrSymbolKey
-    end
 
     class << self
       def inherited(where)
@@ -55,9 +50,7 @@ module Opto
       #   end
       def validator(name, &block)
         raise TypeError, "Block required" unless block_given?
-        define_method("validate_#{name}", &block)
-        validators << "validate_#{name}".to_sym
-        # RUBY_VERSION >= 2.1 would allow validators << define_method("validate_#{name}", block)
+        validators << define_method("validate_#{name}", &block)
       end
 
       def sanitizers
@@ -75,8 +68,7 @@ module Opto
       #   end
       def sanitizer(name, &block)
         raise TypeError, "Block required" unless block_given?
-        define_method("sanitize_#{name}", &block)
-        sanitizers << "sanitize_#{name}".to_sym
+        sanitizers << define_method("sanitize_#{name}", &block)
       end
     end
 
@@ -93,7 +85,7 @@ module Opto
     end
 
     def initialize(options = {})
-      @options = Type::GLOBAL_OPTIONS.merge(self.class.const_defined?(:OPTIONS) ? self.class.const_get(:OPTIONS) : {}).merge(options)
+      @options = Type::GLOBAL_OPTIONS.merge(self.class.const_defined?(:OPTIONS) ? self.class.const_get(:OPTIONS) : {}).merge(options.symbolize_keys)
     end
 
     def type
@@ -128,7 +120,7 @@ module Opto
     def validate(value)
       errors.clear
       if value.nil?
-        errors[:presence] = "Required value missing" if required? 
+        errors[:presence] = "Required value missing" if required?
       else
         (Type.validators + self.class.validators).each do |validator|
           begin

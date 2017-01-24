@@ -3,11 +3,6 @@ require 'uri'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   module Types
     # An uri/url.
@@ -15,7 +10,7 @@ module Opto
     # Options:
     #   schemes: an array of allowed schemes, such as ['http', 'https', 'file']
     class Uri < Opto::Type
-      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+      using Opto::Extension::HashStringOrSymbolKey
 
       OPTIONS = {
         schemes: [ 'http', 'https' ]

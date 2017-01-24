@@ -4,21 +4,14 @@ require_relative 'setter'
 require_relative 'extensions/snake_case'
 require_relative 'extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   # What is an option? It's like a variable that has a value, which can be validated or
   # manipulated on creation. The value can be resolved from a number of origins, such as
   # an environment variable or random string generator.
   class Option
 
-    unless RUBY_VERSION < '2.1'
-      using Opto::Extension::SnakeCase
-      using Opto::Extension::HashStringOrSymbolKey
-    end
+    using Opto::Extension::SnakeCase
+    using Opto::Extension::HashStringOrSymbolKey
 
     attr_accessor :type
     attr_accessor :name

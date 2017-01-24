@@ -2,11 +2,6 @@ require 'opto/option'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   # A group of Opto::Option instances. Members of Groups can see their relatives
   # and their values. Such as `option.value_of('another_option')`
@@ -14,7 +9,7 @@ module Opto
   # Most Array instance methods are delegated, such as .map, .each, .find etc.
   class Group
 
-    using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+    using Opto::Extension::HashStringOrSymbolKey
 
     attr_reader :options, :defaults
 

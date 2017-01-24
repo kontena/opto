@@ -1,11 +1,6 @@
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   module Setters
     # Set a value to environment.
@@ -15,7 +10,7 @@ module Opto
     # Everything will be converted to strings unless hint is a hash with :options. (also include :name in that case)
     class Env < Opto::Setter
 
-      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+      using Opto::Extension::HashStringOrSymbolKey
 
       attr_accessor :env_name, :dont_stringify
 

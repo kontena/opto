@@ -3,11 +3,6 @@ require 'base64'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
 
-if RUBY_VERSION < '2.1'
-  using Opto::Extension::SnakeCase
-  using Opto::Extension::HashStringOrSymbolKey
-end
-
 module Opto
   module Types
     # A string
@@ -25,7 +20,7 @@ module Opto
     #   - capitalize: set to true to upcase the first letter
     #   - hexdigest: valid options: md5, sha1, sha256, sha384, sha512 and nil/false. generate an md5/sha1/etc hexdigest from the value.
     class String < Opto::Type
-      using Opto::Extension::HashStringOrSymbolKey unless RUBY_VERSION < '2.1'
+      using Opto::Extension::HashStringOrSymbolKey
 
       TRANSFORMATIONS = [ :upcase, :downcase, :strip, :chomp, :capitalize ]
 

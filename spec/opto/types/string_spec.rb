@@ -14,7 +14,12 @@ describe Opto::Types::String do
     end
 
     it 'converts to nil when string is empty' do
-      expect(subject.new(empty_is_nil: true).sanitize_empty_is_nil("  \n")).to be_nil 
+      expect(subject.new(empty_is_nil: true).sanitize_empty_is_nil("  \n")).to be_nil
+    end
+
+    it 'doesnt convert to nil when string is empty and empty_is_nil is false' do
+      expect(subject.new('empty_is_nil' => false).sanitize_empty_is_nil("")).to eq ''
+      expect(subject.new(empty_is_nil: false).sanitize_empty_is_nil("")).to eq ''
     end
 
     it 'converts to upcase' do
