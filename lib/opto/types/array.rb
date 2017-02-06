@@ -26,6 +26,10 @@ module Opto
         compact: false
       }
 
+      true_when do |value|
+        value.kind_of?(::Array) && !value.empty
+      end
+
       sanitizer :split do |value|
         if value.kind_of?(::Array)
           value

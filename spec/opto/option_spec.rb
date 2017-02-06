@@ -285,9 +285,11 @@ describe Opto::Option do
     let(:group) do
       Opto::Group.new(
         [
+          { name: 'bool', type: :boolean, value: false },
           { name: 'foo', type: :string },
           { name: 'bar', type: :integer, value: 2 },
           { name: 'skip_if_foo', type: :string, skip_if: 'foo' },
+          { name: 'only_if_bool', type: :string, only_if: 'bool' },
           { name: 'only_if_bar', type: :string, only_if: 'bar' },
           { name: 'only_if_bar_2', type: :string, only_if: { 'bar' => 2 } },
           { name: 'only_if_bar_3_foo_not_baz', type: :string, skip_if: { 'foo' => 'baz' }, only_if: { 'bar' => 3 } },
@@ -310,6 +312,10 @@ describe Opto::Option do
     end
 
     it 'knows when to skip' do
+      expect(group.option('only_if_bool').skip?).to be_truthy
+      group.option('bool').value = true
+      expect(group.option('only_if_bool').skip?).to be_falsey
+
       expect(group.option('skip_if_foo').skip?).to be_falsey
       group.option('foo').value = 'baz'
       expect(group.option('skip_if_foo').skip?).to be_truthy

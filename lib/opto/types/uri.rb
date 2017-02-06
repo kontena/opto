@@ -16,6 +16,10 @@ module Opto
         schemes: [ 'http', 'https' ]
       }
 
+      true_when do |value|
+        !value.to_s.strip.empty?
+      end
+
       validator :scheme do |value|
         return nil if options[:schemes].nil? || options[:schemes].empty?
         scheme = uri(value).scheme

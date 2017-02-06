@@ -117,7 +117,7 @@ module Opto
         []
       when ::Array
         ifs.map do |iff|
-          lambda { |grp| !grp.value_of(iff).nil? }
+          lambda { |grp| grp.option(iff).true?  }
         end
       when Hash
         ifs.each_with_object([]) do |(k, v), arr|
@@ -175,7 +175,7 @@ module Opto
           end
         end
       when String, Symbol
-        [lambda { |grp| !grp.value_of(ifs.to_s).nil? }]
+        normalize_ifs([ifs])
       else
         raise TypeError, "Invalid syntax for conditional"
       end

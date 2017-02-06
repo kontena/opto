@@ -19,6 +19,10 @@ module Opto
         nil_is_zero: false
       }
 
+      true_when do |value|
+        !value.nil?
+      end
+
       sanitizer :to_i do |value|
         value.nil? ? (options[:nil_is_zero] ? 0 : nil) : value.to_i
       end

@@ -233,6 +233,10 @@ module Opto
       handler.valid?(value)
     end
 
+    def true?
+      handler.truthy?(value)
+    end
+
     # Validation errors
     # @return [Hash]
     def errors
