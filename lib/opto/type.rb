@@ -70,6 +70,11 @@ module Opto
         raise TypeError, "Block required" unless block_given?
         sanitizers << define_method("sanitize_#{name}", &block)
       end
+
+      def true_when(&block)
+        raise TypeError, "Block required" unless block_given?
+        define_method(:truthy?, &block)
+      end
     end
 
     # The default :in validator, returns an error unless the

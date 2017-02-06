@@ -1,6 +1,7 @@
 require_relative '../type'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
+require 'opto/types/boolean'
 
 module Opto
   module Types
@@ -41,6 +42,10 @@ module Opto
         can_be_other: false,
         in: []
       }
+
+      true_when do |value|
+        Opto::Types::Boolean.new(options).sanitize_to_bool(value)
+      end
 
       def initialize(options={})
         opts = normalize_opts(options.delete(:options))

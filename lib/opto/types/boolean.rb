@@ -25,6 +25,10 @@ module Opto
         as: 'string'
       }
 
+      true_when do |value|
+        sanitize_to_bool(value)
+      end
+
       sanitizer :to_bool do |value|
         if value.nil?
           options[:nil_is]

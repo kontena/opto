@@ -2,6 +2,7 @@ require_relative '../type'
 require 'base64'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
+require 'opto/types/boolean'
 
 module Opto
   module Types
@@ -33,6 +34,9 @@ module Opto
         decode_64: false
       }.merge(Hash[*TRANSFORMATIONS.flat_map {|tr| [tr, false]}])
 
+      true_when do |value|
+        !value.nil? && !value.strip.empty? && value != 'false'
+      end
 
       sanitizer :encode_64 do |value|
         (options[:encode_64] && value) ? Base64.encode64(value) : value
