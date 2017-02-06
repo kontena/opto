@@ -22,7 +22,7 @@ module Opto
         blank_is: false,
         false: 'false',
         true: 'true',
-        as: 'string'
+        as: 'boolean'
       }
 
       true_when do |value|
