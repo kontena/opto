@@ -2,7 +2,6 @@ require_relative '../type'
 require 'base64'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
-require 'opto/types/boolean'
 
 module Opto
   module Types
@@ -25,7 +24,7 @@ module Opto
 
       TRANSFORMATIONS = [ :upcase, :downcase, :strip, :chomp, :capitalize ]
 
-      OPTIONS = {
+      OPTIONS ||= {
         min_length: nil,
         max_length: nil,
         empty_is_nil: true,

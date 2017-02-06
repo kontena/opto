@@ -12,7 +12,7 @@ module Opto
     class Uri < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 
-      OPTIONS = {
+      OPTIONS ||= {
         schemes: [ 'http', 'https' ]
       }
 

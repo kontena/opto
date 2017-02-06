@@ -13,7 +13,7 @@ module Opto
     class Integer < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 
-      OPTIONS = {
+      OPTIONS ||= {
         min: 0,
         max: nil,
         nil_is_zero: false

@@ -16,7 +16,7 @@ module Opto
     class Boolean < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 
-      OPTIONS = {
+      OPTIONS ||= {
         truthy: ['true', 'yes', '1', 'on', 'enabled', 'enable'],
         nil_is: false,
         blank_is: false,

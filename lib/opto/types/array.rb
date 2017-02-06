@@ -16,7 +16,7 @@ module Opto
       using Opto::Extension::HashStringOrSymbolKey
 
 
-      OPTIONS = {
+      OPTIONS ||= {
         split: ',',
         join: false,
         empty_is_nil: false,

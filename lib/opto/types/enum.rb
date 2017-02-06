@@ -1,7 +1,6 @@
 require_relative '../type'
 require 'opto/extensions/snake_case'
 require 'opto/extensions/hash_string_or_symbol_key'
-require 'opto/types/boolean'
 
 module Opto
   module Types
@@ -37,14 +36,14 @@ module Opto
     class Enum < Opto::Type
       using Opto::Extension::HashStringOrSymbolKey
 
-      OPTIONS = {
+      OPTIONS ||= {
         options: [],
         can_be_other: false,
         in: []
       }
 
       true_when do |value|
-        Opto::Types::Boolean.new(options).sanitize_to_bool(value)
+        !value.nil?
       end
 
       def initialize(options={})
