@@ -25,6 +25,10 @@ module Opto
           option.value_of(var)
         end
       end
+
+      def after
+        reset_tried
+      end
     end
   end
 end
