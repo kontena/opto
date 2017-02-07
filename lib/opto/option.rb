@@ -203,7 +203,7 @@ module Opto
         rescue StandardError => ex
           raise ex, "Resolver '#{resolver.origin}' for '#{name}' : #{ex.message}"
         end
-        if result
+        unless result.nil?
           @origin = resolver.origin
           return result
         end
