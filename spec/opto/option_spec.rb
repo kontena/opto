@@ -182,26 +182,17 @@ describe Opto::Option do
       end
 
       it 'returns a resolved value' do
-        expect(resolver).to receive(:resolve).and_return('blerbz')
+        expect(resolver).to receive(:try_resolve).and_return('blerbz')
         instance = klass.new(base_opts.merge(from: { env: 'FOO_OPT'}, value: nil, default: nil))
         expect(instance.value).to eq 'blerbz'
       end
 
       it 'adds the option name in the exception message if a resolver raises' do
         instance = klass.new(base_opts.merge(from: { env: nil }, value: nil, default: nil))
-        expect(resolver).to receive(:resolve).and_raise(ArgumentError, "boo")
+        expect(resolver).to receive(:try_resolve).and_raise(ArgumentError, "boo")
         expect{instance.value}.to raise_error(ArgumentError) do |ex|
           expect(ex.message).to start_with("Resolver 'double' for 'foo' :")
         end
-      end
-
-      it 'calls before & after' do
-        allow(resolver).to receive(:respond_to?).and_return(true)
-        expect(resolver).to receive(:before).and_return(true)
-        expect(resolver).to receive(:after).and_return(true)
-        expect(resolver).to receive(:resolve).and_return('blerbz')
-        instance = klass.new(base_opts.merge(from: { env: 'FOO_OPT'}, value: nil, default: nil))
-        expect(instance.value).to eq 'blerbz'
       end
     end
 
