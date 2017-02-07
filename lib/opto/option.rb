@@ -199,9 +199,7 @@ module Opto
     def resolve
       resolvers.each do |resolver|
         begin
-          resolver.respond_to?(:before) && resolver.before(self)
-          result = resolver.resolve
-          resolver.respond_to?(:after) && resolver.after(self)
+          result = resolver.try_resolve
         rescue StandardError => ex
           raise ex, "Resolver '#{resolver.origin}' for '#{name}' : #{ex.message}"
         end
