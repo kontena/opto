@@ -27,6 +27,10 @@ module Opto
           raise TypeError, "Syntax error: '#{interpolated_hint}' does not look like a number or a calculation"
         end
       end
+
+      def after
+        reset_tried
+      end
     end
   end
 end

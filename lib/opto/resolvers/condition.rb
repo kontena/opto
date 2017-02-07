@@ -79,6 +79,10 @@ module Opto
         matching_condition = conditions.find {|c| c.true? }
         matching_condition.result
       end
+
+      def after
+        reset_tried # conditional value can change if some of the depending variables change values
+      end
     end
   end
 end

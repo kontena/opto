@@ -43,6 +43,28 @@ module Opto
     def initialize(hint = nil, option = nil)
       @hint = hint
       @option = option
+      @tried = false
+    end
+
+    def tried?
+      !!@tried
+    end
+
+    def set_tried
+      @tried = true
+    end
+
+    def reset_tried
+      @tried = false
+    end
+
+    def try_resolve
+      return nil if tried?
+      set_tried
+      self.respond_to?(:before) && self.before
+      result = resolve
+      self.respond_to?(:after) && self.after
+      result
     end
 
     # This is a "base" class, you're supposed to inherit from this in your resolver and define a #resolve method.
