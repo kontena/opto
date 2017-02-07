@@ -3,6 +3,7 @@ require 'ostruct'
 
 describe Opto::Resolver do
   after(:each) do
+    # have to do it like this instead of Class.new because the class name is significant.
     Object.send(:remove_const, :ResolverTest) if Object.const_defined?(:ResolverTest)
   end
 
@@ -34,6 +35,12 @@ describe Opto::Resolver do
     it 'knows its parent option' do
       expect(Opto::Resolver.for(:resolver_test).new('hint', OpenStruct.new(name: 'foo')).option.name).to eq 'foo'
       expect(Opto::Resolver.for(:resolver_test).new('hint', OpenStruct.new(name: 'foo')).hint).to eq 'hint'
+    end
+
+    it 'only tries once' do
+      expect(subject).to receive(:resolve).once.and_return(nil)
+      subject.try_resolve
+      subject.try_resolve
     end
   end
 end
