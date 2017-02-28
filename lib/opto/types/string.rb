@@ -37,6 +37,10 @@ module Opto
         !value.nil? && !value.strip.empty? && value != 'false'
       end
 
+      sanitizer :to_s do |value|
+        value.nil? ? nil : value.to_s
+      end
+
       sanitizer :encode_64 do |value|
         (options[:encode_64] && value) ? Base64.encode64(value) : value
       end
