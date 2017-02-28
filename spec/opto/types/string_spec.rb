@@ -5,6 +5,15 @@ describe Opto::Types::String do
   let(:subject) { described_class }
 
   context 'sanitize' do
+    it 'converts booleans to strings' do
+      expect(subject.new.sanitize_to_s(false)).to eq "false"
+      expect(subject.new.sanitize_to_s(true)).to eq "true"
+    end
+
+    it 'converts numbers to strings' do
+      expect(subject.new.sanitize_to_s(1)).to eq "1"
+    end
+
     it 'converts a string to base64' do
       expect(Base64.decode64(subject.new(encode_64: true).sanitize_encode_64("foo"))).to eq "foo"
     end
