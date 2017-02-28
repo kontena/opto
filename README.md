@@ -582,5 +582,4 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/konten
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
+The gem is available as open source under the terms of the Apache License, Version 2.0. See [LICENSE](LICENSE.txt) for full license text.
