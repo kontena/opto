@@ -55,7 +55,7 @@ module Opto
           if hint[:length].nil?
             raise ArgumentError, "Invalid settings for random string. Required: length, optional: charset. Charsets : numbers, letters, alphanumeric, hex, base64, ascii_printable and X-Y range."
           end
-        elsif (hint.kind_of?(String) && hint.to_i > 0) || hint.kind_of?(Fixnum)
+        elsif (hint.kind_of?(String) && hint.to_i > 0) || hint.kind_of?(0.class)
           self.hint = { length: hint.to_i }
         else
           raise ArgumentError, "Missing settings for random string."

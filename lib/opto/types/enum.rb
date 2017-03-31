@@ -84,7 +84,7 @@ module Opto
               end
             end
             options
-          when ::String, Fixnum
+          when ::String, ( 0.class == Integer ? Integer : Fixnum )
             options.map do |opt|
               { value: opt, description: opt, label: opt }
             end
