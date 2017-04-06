@@ -465,6 +465,15 @@ Hint is the value that gets passed to the resolver when doing for example: `env:
 ### env
 Hint is the environment variable name to read from. Defaults to the option's name.
 
+To try multiple env variables, use:
+
+```yaml
+from:
+  env:
+    - KEY1
+    - KEY2
+```
+
 ### file
 Hint can be a string containing a path to the file, or a hash that defines `path: 'file_path', ignore_errors: true`
 
