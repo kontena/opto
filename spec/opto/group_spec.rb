@@ -45,7 +45,7 @@ describe Opto::Group do
   end
 
   it '#run runs all the setters for valid non-skipped options' do
-    setter = double(:setter) 
+    setter = double(:setter)
     expect(Opto::Setter).to receive(:for).with(:env).twice.and_return(setter)
     expect(setter).to receive(:new).with('BAZBAZ', instance_of(Opto::Option)).and_return(setter)
     expect(setter).to receive(:new).with('DOGDOG', instance_of(Opto::Option)).and_return(setter)

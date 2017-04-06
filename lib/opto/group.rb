@@ -38,7 +38,6 @@ module Opto
       else
         @options = []
       end
-
     end
 
     # Are all options valid? (Option value passes validation)
@@ -181,7 +180,6 @@ module Opto
       end
     end
 
-
-    def_delegators :@options, *(::Array.instance_methods - [:__send__, :object_id, :to_h, :to_a, :is_a?, :kind_of?, :instance_of?])
+    def_delegators :@options, *(::Array.instance_methods - [:__send__, :object_id, :to_h, :to_a, :is_a?, :kind_of?, :instance_of?, :self, :inspect, :nil?])
   end
 end
