@@ -44,7 +44,7 @@ module Opto
       sanitizer :output do |value|
         case options[:as].to_s.strip.downcase
         when 'integer'
-          value ? (options[:true].kind_of?(Fixnum) ? options[:true] : 1) : (options[:false].kind_of?(Fixnum) ? options[:false] : 0)
+          value ? (options[:true].kind_of?(0.class) ? options[:true] : 1) : (options[:false].kind_of?(Fixnum) ? options[:false] : 0)
         when 'boolean'
           value
         else
