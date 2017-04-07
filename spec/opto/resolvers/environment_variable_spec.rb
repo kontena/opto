@@ -32,6 +32,13 @@ describe Opto::Resolvers::Env do
       expect(ENV).to receive(:[]).with('BLIRB').and_return('nil')
       expect(subject.new('BLIRB').resolve).to be_nil
     end
+
+    it 'accepts an array of keys and returns the first match' do
+      allow(ENV).to receive(:[]).and_return(nil)
+      expect(ENV).to receive(:[]).with('BLERB').and_return('foo')
+      expect(ENV).not_to receive(:[]).with('BLYRB')
+      expect(subject.new(['BLIRB', 'BLURB', 'BLERB', 'BLYRB']).resolve).to eq 'foo'
+    end
   end
 end
 
