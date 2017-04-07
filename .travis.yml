@@ -3,7 +3,7 @@ rvm:
   - 2.1.10
   - 2.2.3
   - 2.3.3
-  - 2.4.0
+  - 2.4.1
 env:
   - secure: "bCu1bVzr6SP+gAbMo88GvcHHbhO3LcnJtWp+YuSZ5qW4EHhdBw+DOQeOlzoKHtYhNhptmb/65pZZctRTE6jOOSZzpOUHaeqaqHZpELldkCMu7rE8bXuCV4OfhG0CKWvURS0x5p5F5onEx1a1sjiu+MVEUqktAPDAcdTBNBW1irRwvnSifgjcZRLzfm1aRs1fqzBJpHaAXyD++2GQaWyXDtQsEsc/Eyhmnkac5Y2cTeQiYlDluqBeB885q9K16ruLp2NWx/rnR8RGMP1LSnrye/GEo2mRWOWy1MyIEwNDcVaA6MVDY2GBIQUoXg4PBrZAleVIsO3LzwR4oorFCaSgWxzqYI67g5Kb2zn8fW9Yu5lDcFEJKIHQAwBrlq3n3Mi5it/IxGQDWXQ/2fjBxCwuilvI0WTzOH0m4g8Uf6jHaQLFC6ahdWDjfs6aCzdPpbJls26/r39NIB5k/6ZO29NZkxGBsQ7E7m4wurr7a9ksLODgPOyPiB8/4Txu35Llp+IuJpbshrlkRIMwEIFVWiLi6MZhRBkxaRzlkJQ0bS3RD9W4z9UJyoBujmgXMrv0eHNTGCOC+/4tvrA+pXzJwmFQJA6TnenoDl9hc6o03gyfH/YvmMgrtJLbJ8rGoLRaY8HsQwHWgimpCl1o043kO8/UkhhS7J4wyQXYwqGnA2PC/j0="
 before_install: gem install bundler -v 1.12.5
