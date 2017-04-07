@@ -1,7 +1,6 @@
 module Opto
   module Extension
-    # Refines String to have .snakecase method that turns
-    # StringLikeThis into a string_like_this
+    # Refines hash to have #symbolize_keys which symbolizes all keys.
     module SymbolizeKeys
       refine Hash do
         def symbolize_keys
