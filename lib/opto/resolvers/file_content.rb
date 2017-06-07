@@ -4,7 +4,7 @@ module Opto
     class File < Opto::Resolver
 
       def ignore_errors?
-        return false unless hint.kind_of?(Hash) && (hint['ignore_errors'] || hint[:ignore_errors])
+        hint.kind_of?(Hash) && (hint['ignore_errors'] || hint[:ignore_errors])
       end
 
       def file_path
