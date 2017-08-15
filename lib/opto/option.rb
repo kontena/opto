@@ -86,7 +86,17 @@ module Opto
       @only_if       = opts.delete(:only_if)
       @from          = normalize_from_to(opts.delete(:from))
       @to            = normalize_from_to(opts.delete(:to))
-      @type_options  = opts
+      validations    = opts.delete(:validate).to_h
+      transforms     = opts.delete(:transform)
+      transforms     =  case transforms
+                        when NilClass then {}
+                        when Hash then transforms
+                        when Array then
+                          transforms.each_with_object({}) { |t, hash| hash[t] = true }
+                        else
+                          raise TypeError, 'Transform has to be a hash or an array'
+                        end
+      @type_options  = opts.merge(validations).merge(transforms)
 
       set_initial(val) if val
       deep_merge_defaults

@@ -53,6 +53,24 @@ describe Opto::Option do
         expect(subject.value).to eq 'BLEH'
       end
 
+      context 'with grouped sanitizer syntax' do
+        it 'performs the transforms' do
+          opts = base_opts.merge(transform: { strip: true })
+          opts.delete(:strip)
+          subject = klass.new(opts)
+          subject.set '  foo foo  '
+          expect(subject.value).to eq 'foo foo'
+        end
+
+        it 'supports the array variant' do
+          opts = base_opts.merge(transform: [ :strip ])
+          opts.delete(:strip)
+          subject = klass.new(opts)
+          subject.set '  foo foo  '
+          expect(subject.value).to eq 'foo foo'
+        end
+      end
+
       it 'validates the value' do
         expect(subject.handler).to receive(:validate).with('bleh').and_return(true)
         subject.set('bleh')
@@ -82,6 +100,14 @@ describe Opto::Option do
           expect(ex.message).to match(/Validation for foo.*always_raises/)
         end
         subject.handler.class.validators.delete(:validate_always_raises)
+      end
+
+      context 'using grouped syntax' do
+        it 'runs validations from validations key' do
+          subject = klass.new(base_opts.merge(validate: { min_length: 10 }))
+          subject.set 'abcd'
+          expect(subject.errors[:validate_min_length]).to match /Too short/
+        end
       end
     end
 
