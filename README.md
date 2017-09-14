@@ -521,6 +521,7 @@ fruits:
     evaluate: ${apples} + ${bananas}
 
 # group.value_of('fruits') => 3
+```
 
 ### interpolate
 Hint is a template. Uses values from other options to build a string.
