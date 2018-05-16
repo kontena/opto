@@ -45,7 +45,7 @@ describe Opto::Group do
   end
 
   it '#run runs all the setters for valid non-skipped options' do
-    setter = double(:setter)
+    setter = double
     expect(Opto::Setter).to receive(:for).with(:env).twice.and_return(setter)
     expect(setter).to receive(:new).with('BAZBAZ', instance_of(Opto::Option)).and_return(setter)
     expect(setter).to receive(:new).with('DOGDOG', instance_of(Opto::Option)).and_return(setter)
@@ -98,6 +98,18 @@ describe Opto::Group do
     grp = Opto::Group.new(defaults: { type: :string })
     opt = grp.build_option(name: 'foo')
     expect(opt.type).to eq 'string'
+  end
+
+  it 'supports defining proc resolvers' do
+    group = subject.new(resolvers: { magicians_hat: proc { "rabbit" } }, surprise: { type: :string, from: { 'magicians_hat' => 'foo' } })
+    expect(group.value_of('surprise')).to eq 'rabbit'
+  end
+
+  it 'supports defininig proc setters' do
+    setter = double
+    expect(setter).to receive(:set).with('meow')
+    group = subject.new(setters: { vault: proc { |_, val, _| setter.set(val) } }, cat: { type: :string, value: 'meow', to: 'vault' })
+    expect(group.run)
   end
 end
 
