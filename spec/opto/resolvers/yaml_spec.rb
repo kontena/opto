@@ -40,5 +40,15 @@ describe Opto::Resolvers::Yaml do
       opt = Opto::Option.new(type: :array, from: { yaml: { file: 'foofoo.yml', key: 'abc' } } )
       expect(opt.value).to eq ['123', '456']
     end
+
+    it 'can read a yaml as a group' do
+      expect(File).to receive(:read).with('foofoo.yml').and_return(YAML.dump('abc' => { 'type' => 'string', 'value' => 'world' }))
+      allow(File).to receive(:read).and_call_original
+      group = Opto::Group.new(
+        foo: { type: :group, from: { yaml: { file: 'foofoo.yml' }}},
+        bar: { type: :string, from: { interpolate: "hello, ${foo.abc}" } }
+      )
+      expect(group.value_of('bar')).to eq "hello, world"
+    end
   end
 end
