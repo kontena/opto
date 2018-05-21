@@ -14,20 +14,16 @@ module Opto
 
       def resolve
         raise TypeError, "String expected" unless hint.kind_of?(String)
-        hint.gsub(/(?<!\$)\$(?!\$)\{?\w+\}?/) do |v|
+        hint.gsub(/(?<!\$)\$(?!\$)\{?[\w\.]+\}?/) do |v|
           var = v.tr('${}', '')
-          if option.group.nil? || option.group.option(var).nil?
-            raise RuntimeError, "Variable #{var} not declared"
-          end
-          if option.value_of(var).nil?
-            raise RuntimeError, "No value for #{var}, note that the order is meaningful"
-          end
-          option.value_of(var)
-        end
-      end
 
-      def after
-        reset_tried
+          raise RuntimeError, "Variable #{var} not declared" if option.group.nil?
+          opt = option.group.option(var)
+          raise RuntimeError, "Variable #{var} not declared" if opt.nil?
+          value = opt.value
+          raise RuntimeError, "No value for #{var}, note that the order is meaningful" if value.nil?
+          value
+        end
       end
     end
   end
