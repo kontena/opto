@@ -16,6 +16,28 @@ describe Opto::Resolvers::Interpolate do
       opt_3 = group.build_option(type: :string, name: 'greeting', from: { interpolate: '$hi ${place}'})
       expect(opt_3.value).to eq 'hello world'
     end
+
+    it 'interpolates values from sub-options into a string' do
+      group = Opto::Group.new(
+        'foo' => {
+          type: :group,
+          value: {
+            'bar' => {
+              type: :string,
+              value: 'hello'
+            }
+          }
+        },
+        'baz' => {
+          type: :string,
+          from: {
+            interpolate: "${foo.bar}, world"
+          }
+        }
+      )
+
+      expect(group.option('baz').value).to eq "hello, world"
+    end
   end
 end
 

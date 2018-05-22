@@ -108,7 +108,25 @@ module Opto
     # @param [String] option_name
     # @return [Opto::Option]
     def option(option_name)
-      options.find { |opt| opt.name == option_name }
+      if option_name.to_s.include?('.')
+        parts = option_name.to_s.split('.')
+        var_name = parts.pop
+        group = parts.inject(self) do |base, part|
+          grp = base.option(part).value
+          if grp.nil?
+            raise NameError, "No such group: #{base.name}.#{part}"
+          elsif grp.kind_of?(Opto::Group)
+            grp
+          else
+            raise TypeError, "Is not a group: #{base.name}.#{part}"
+          end
+        end
+      else
+        group = self
+        var_name = option_name
+      end
+
+      group.options.find { |opt| opt.name == var_name }
     end
 
     # Get a value of a member by option name
