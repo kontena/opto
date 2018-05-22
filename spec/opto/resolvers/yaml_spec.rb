@@ -50,5 +50,13 @@ describe Opto::Resolvers::Yaml do
       )
       expect(group.value_of('bar')).to eq "hello, world"
     end
+
+    it 'can read yaml from a variable' do
+      group = Opto::Group.new(
+        origin: { type: :string, value: YAML.dump('foo' => 'bar') },
+        dest: { type: :string, from: { yaml: { variable: 'origin', key: 'foo' } } }
+      )
+      expect(group.value_of('dest')).to eq 'bar'
+    end
   end
 end

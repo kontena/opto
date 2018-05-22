@@ -16,12 +16,21 @@ module Opto
 
       def resolve
         raise TypeError, "Hash expected" unless hint.kind_of?(Hash)
-        raise TypeError, "Missing file definition" unless hint[:file]
 
         require 'yaml' unless Kernel.const_defined?(:YAML)
-        yaml = YAML.safe_load(::File.read(hint[:file]), [], [], true, hint[:file])
+
+        if hint[:file]
+          yaml = YAML.safe_load(::File.read(hint[:file]), [], [], true, hint[:file])
+        elsif hint[:variable]
+          raise TypeError, "Option not in a group" unless option.has_group?
+          other_opt = option.group.option(hint[:variable])
+          raise ArgumentError, "No such option: #{hint[:variable]}" if other_opt.nil?
+          yaml = YAML.safe_load(other_opt.value.to_s, [], [], true, hint[:variable])
+        else
+          raise TypeError, "Missing file/variable definition"
+        end
         if hint[:key]
-          raise TypeError, "Data file #{hint[:file]} is not a hash" unless yaml.kind_of?(Hash)
+          raise TypeError, "Source is not a hash" unless yaml.kind_of?(Hash)
           if yaml.key?(hint[:key])
             yaml[hint[:key]]
           elsif hint[:key].include?('.')
