@@ -11,33 +11,50 @@ module Opto
 
     using Opto::Extension::HashStringOrSymbolKey
 
-    attr_reader :options, :defaults
-
     extend Forwardable
 
     # Initialize a new Option Group. You can also pass in :defaults.
     #
     # @param [Array<Hash,Opto::Option>,Hash,NilClass] opts An array of Option definition hashes or Option objects or a hash like { var_name: { opts } }.
     # @return [Opto::Group]
-    def initialize(*options)
-      if options.size > 0
-        if options.last.kind_of?(Hash) && options.last[:defaults]
-          @defaults = options.pop[:defaults]
-        end
-        @options =
-          case options.first
-          when NilClass
-            []
-          when Hash
-            options.first.map {|k,v| Option.new({name: k.to_s, group: self}.merge(v))}
-          when ::Array
-            options.first.map {|opt| opt.kind_of?(Opto::Option) ? opt : Option.new(opt.merge(group: self)) }
-          else
-            raise TypeError, "Invalid type #{options.first.class} for Opto::Group.new"
+    def initialize(*opts)
+      case opts.first
+      when NilClass
+      when Hash
+        defaults.merge!(opts.first.delete(:defaults)) if opts.first.key?(:defaults)
+        setters.merge!(opts.first.delete(:setters)) if opts.first.key?(:setters)
+        resolvers.merge!(opts.first.delete(:resolvers)) if opts.first.key?(:resolvers)
+        options.concat(opts.first.map {|k,v| Option.new({name: k.to_s, group: self}.merge(v))})
+      when ::Array
+        if opts.last.is_a?(Hash) && !opts.last.key?(:type)
+          opts.pop.tap do |settings|
+            defaults.merge!(settings[:defaults]) if settings.key?(:defaults)
+            setters.merge!(settings[:setters]) if settings.key?(:setters)
+            resolvers.merge!(settings[:resolvers]) if settings.key?(:resolvers)
           end
+        end
+        if opts.first.kind_of?(Array)
+          options.concat(opts.first.map { |opt| opt.kind_of?(Opto::Option) ? opt : Option.new(opt.merge(group: self)) })
+        end
       else
-        @options = []
+        raise TypeError, "Invalid type #{opts.class} for Opto::Group.new"
       end
+    end
+
+    def options
+      @options ||= []
+    end
+
+    def setters
+      @setters ||= {}
+    end
+
+    def resolvers
+      @resolvers ||= {}
+    end
+
+    def defaults
+      @defaults ||= {}
     end
 
     # Are all options valid? (Option value passes validation)
@@ -91,7 +108,25 @@ module Opto
     # @param [String] option_name
     # @return [Opto::Option]
     def option(option_name)
-      options.find { |opt| opt.name == option_name }
+      if option_name.to_s.include?('.')
+        parts = option_name.to_s.split('.')
+        var_name = parts.pop
+        group = parts.inject(self) do |base, part|
+          grp = base.option(part).value
+          if grp.nil?
+            raise NameError, "No such group: #{base.name}.#{part}"
+          elsif grp.kind_of?(Opto::Group)
+            grp
+          else
+            raise TypeError, "Is not a group: #{base.name}.#{part}"
+          end
+        end
+      else
+        group = self
+        var_name = option_name
+      end
+
+      group.options.find { |opt| opt.name == var_name }
     end
 
     # Get a value of a member by option name
@@ -180,6 +215,6 @@ module Opto
       end
     end
 
-    def_delegators :@options, *(::Array.instance_methods - [:__send__, :object_id, :to_h, :to_a, :is_a?, :kind_of?, :instance_of?, :self, :inspect, :nil?])
+    def_delegators :options, *(::Array.instance_methods - [:__send__, :object_id, :to_h, :to_a, :is_a?, :kind_of?, :instance_of?, :self, :inspect, :nil?])
   end
 end

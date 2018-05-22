@@ -146,8 +146,8 @@ describe Opto::Option do
     end
 
     describe '#setters' do
-      it 'returns an array of Setters' do
-        expect(subject.setters.all? {|r| r.kind_of?(Opto::Setter) }).to be_truthy
+      it 'returns an array of setter configs' do
+        expect(subject.setters).to match array_including(hash_including(:target, :hint, :setter))
       end
     end
 
@@ -171,28 +171,18 @@ describe Opto::Option do
         subject.output
       end
 
-      it 'calls before & after' do
-        expect(setter).to receive(:new).and_return(setter)
-        expect(setter).to receive(:set).and_return(true)
-        allow(setter).to receive(:respond_to?).and_return(true)
-        expect(setter).to receive(:before).and_return(true)
-        expect(setter).to receive(:after).and_return(true)
-        subject.set('blerb')
-        subject.output
-      end
-
       it 'adds the option name in the exception message if a setter raises' do
         expect(setter).to receive(:new).and_return(setter)
         expect(setter).to receive(:set).and_raise(ArgumentError, "boo")
         expect{subject.output}.to raise_error(ArgumentError) do |ex|
-          expect(ex.message).to start_with("Setter 'double' for 'foo' :")
+          expect(ex.message).to start_with("Setter 'env' for 'foo' :")
         end
       end
     end
 
     describe '#resolvers' do
       it 'returns an array of Resolvers' do
-        expect(subject.resolvers.all? {|r| r.kind_of?(Opto::Resolver) }).to be_truthy
+        expect(subject.resolvers).to match array_including(hash_including(:origin, :hint, :resolver))
       end
     end
 
@@ -208,16 +198,16 @@ describe Opto::Option do
       end
 
       it 'returns a resolved value' do
-        expect(resolver).to receive(:try_resolve).and_return('blerbz')
+        expect(resolver).to receive(:resolve).and_return('blerbz')
         instance = klass.new(base_opts.merge(from: { env: 'FOO_OPT'}, value: nil, default: nil))
         expect(instance.value).to eq 'blerbz'
       end
 
       it 'adds the option name in the exception message if a resolver raises' do
         instance = klass.new(base_opts.merge(from: { env: nil }, value: nil, default: nil))
-        expect(resolver).to receive(:try_resolve).and_raise(ArgumentError, "boo")
+        expect(resolver).to receive(:resolve).and_raise(ArgumentError, "boo")
         expect{instance.value}.to raise_error(ArgumentError) do |ex|
-          expect(ex.message).to start_with("Resolver 'double' for 'foo' :")
+          expect(ex.message).to start_with("Resolver 'env' for 'foo' :")
         end
       end
     end

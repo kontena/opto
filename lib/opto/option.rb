@@ -97,9 +97,14 @@ module Opto
                          raise TypeError, 'Transform has to be a hash or an array'
                        end
       @type_options  = opts.merge(validations).merge(transforms)
+      @tried_resolve = false
 
       set_initial(val) if val
       deep_merge_defaults
+    end
+
+    def has_group?
+      !group.nil?
     end
 
     def deep_merge_defaults
@@ -150,7 +155,7 @@ module Opto
     # Returns true if this field should not be processed because of the conditionals
     # @return [Boolean]
     def skip?
-      return false if group.nil?
+      return false unless has_group?
       return true if group.any_true?(skip_if)
       return true unless group.all_true?(only_if)
       false
@@ -160,7 +165,8 @@ module Opto
     # @param [String] option_name
     def value_of(option_name)
       return value if option_name == self.name
-      group.nil? ? nil : group.value_of(option_name)
+      return nil unless has_group?
+      group.value_of(option_name)
     end
 
     # Run validators
@@ -191,11 +197,11 @@ module Opto
     # Accessor to defined resolvers for this option.
     # @return [Array<Opto::Resolver>]
     def resolvers
-      @resolvers ||= from.merge(default: self).map { |origin, hint| Resolver.for(origin).new(hint, self) }
+      @resolvers ||= from.merge(default: self).map { |origin, hint| { origin: origin, hint: hint, resolver: ((has_group? && group.resolvers[origin]) || Resolver.for(origin)) } }
     end
 
     def setters
-      @setters ||= to.map { |target, hint| Setter.for(target).new(hint, self) }
+      @setters ||= to.map { |target, hint| { target: target, hint: hint, setter: ((has_group? && group.setters[target]) || Setter.for(target)) } }
     end
 
     # True if this field is defined as required: true
@@ -204,32 +210,55 @@ module Opto
       handler.required?
     end
 
+    def tried_resolve?
+      @tried_resolve
+    end
+
+    def set_tried
+      @tried_resolve = true
+    end
+
+    def unset_tried!
+      @tried_resolve = false
+    end
+
     # Run resolvers
     # @raise [TypeError, ArgumentError]
     def resolve
-      resolvers.each do |resolver|
+      return nil if tried_resolve?
+      resolvers.each do |resolver_config|
         begin
-          result = resolver.try_resolve
+          resolver = resolver_config[:resolver]
+          if resolver.respond_to?(:call)
+            result = resolver.call(resolver_config[:hint], self)
+          else
+            result = resolver.new(resolver_config[:hint], self).resolve
+          end
         rescue StandardError => ex
-          raise ex, "Resolver '#{resolver.origin}' for '#{name}' : #{ex.message}"
+          raise ex, "Resolver '#{resolver_config[:origin]}' for '#{name}' : #{ex.message}"
         end
         unless result.nil?
-          @origin = resolver.origin
+          @origin = resolver_config[:origin]
           return result
         end
       end
       nil
+    ensure
+      set_tried
     end
 
     # Run setters
     def output
-      setters.each do |setter|
+      setters.each do |setter_config|
         begin
-          setter.respond_to?(:before) && setter.before(self)
-          setter.set(value)
-          setter.respond_to?(:after)  && setter.after(self)
+          setter = setter_config[:setter]
+          if setter.respond_to?(:call)
+            setter.call(setter_config[:hint], value, self)
+          else
+            setter.new(setter_config[:hint], self).set(value)
+          end
         rescue StandardError => ex
-          raise ex, "Setter '#{setter.target}' for '#{name}' : #{ex.message}"
+          raise ex, "Setter '#{setter_config[:target]}' for '#{name}' : #{ex.message}"
         end
       end
     end

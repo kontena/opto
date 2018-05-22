@@ -10,7 +10,7 @@ module Opto
 
       def resolve
         raise TypeError, "String required" unless hint.kind_of?(String)
-        interpolated_hint = hint.gsub(/(?<!\$)\$(?!\$)\{?\w+\}?/) do |v|
+        interpolated_hint = hint.gsub(/(?<!\$)\$(?!\$)\{?[\w\.]+\}?/) do |v|
           var = v.tr('${}', '')
           if option.group.nil? || option.group.option(var).nil?
             raise RuntimeError, "Variable #{var} not declared"
@@ -26,10 +26,6 @@ module Opto
         else
           raise TypeError, "Syntax error: '#{interpolated_hint}' does not look like a number or a calculation"
         end
-      end
-
-      def after
-        reset_tried
       end
     end
   end

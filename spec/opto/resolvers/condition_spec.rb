@@ -32,8 +32,10 @@ describe Opto::Resolvers::Condition do
 
       group.option('str').set('foo')
       expect(opt.resolve).to eq 'foofoo'
+      opt.unset_tried!
       group.option('str').set('bar')
       expect(opt.resolve).to eq 'barbar'
+      opt.unset_tried!
       group.option('str').set('baz')
       expect(opt.resolve).to eq 'foobar'
     end
@@ -54,19 +56,26 @@ describe Opto::Resolvers::Condition do
 
       group.option('str').set('foo')
       expect(opt.resolve).to eq 'foobar'
+      opt.unset_tried!
       group.option('int').set(5)
       expect(opt.resolve).to eq 'foobar'
+      opt.unset_tried!
       group.option('int').set(10)
       expect(opt.resolve).to eq 'foobar'
+      opt.unset_tried!
       group.option('int').set(9)
       expect(opt.resolve).to eq 'foobar'
+      opt.unset_tried!
       group.option('str').set("foovoodoo")
       group.option('int').set(5)
       expect(opt.resolve).to eq 'foobar'
+      opt.unset_tried!
       group.option('int').set(10)
       expect(opt.resolve).to eq 'foobar'
+      opt.unset_tried!
       group.option('int').set(9)
       expect(opt.resolve).to eq 'foofoo'
+      opt.unset_tried!
       group.option('str').set("foodoodoo")
       expect(opt.resolve).to eq 'foobar'
     end
