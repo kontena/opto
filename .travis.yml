@@ -18,4 +18,4 @@ deploy:
   gem: opto
   on:
     tags: true
-    rvm: 2.5.1
+    rvm: 2.5
