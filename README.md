@@ -45,10 +45,12 @@ require 'opto'
   foo_username:
     type: string
     required: true
-    min_length: 1
-    max_length: 30
-    strip: true   # remove leading / trailing whitespace
-    upcase: true  # make UPCASE
+    validate:
+      min_length: 1
+      max_length: 30
+    transform:
+      - strip # remove leading / trailing whitespace
+      - upcase # make UPCASE
     from:
       env: FOO_USER # read value from ENV variable FOO_USER
 ```
@@ -72,16 +74,18 @@ require 'opto'
   foo_instances:
     type: integer
     default: 1
-    min: 1
-    max: 30
+    validate:
+      min: 1
+      max: 30
 ```
 
 ```yaml
 # Uri validator
   host_url:
     type: uri
-    schemes:
-      - file # only allow file:/// uris
+    validate:
+      schemes:
+        - file # only allow file:/// uris
 ```
 
 ## Resolvers
@@ -343,6 +347,14 @@ end
   from: prompter
 ```
 
+You can also use procs:
+
+```ruby
+group = Opto::Group.new(
+  resolvers: { prompt: proc { |hint, option| print "Enter #{hint} (default: #{option.default}): "; gets }
+)
+```
+
 ## Subclassing a predefined type handler, setter, etc
 
 ```ruby
@@ -457,6 +469,23 @@ Global validations:
   count: false, # Instead of outputting the array, output the array size
   compact: false # Remove nils before output
 }
+```
+
+### group
+
+Allows nesting of Opto::Groups:
+
+```yaml
+subgroup:
+  type: group
+  value:
+    subvariable:
+      type: string
+      value: world
+greeting:
+  type: string
+  from:
+    interpolate: hello, ${subgroup.subvariable} # becomes hello, world
 ```
 
 ## Default resolvers
@@ -597,6 +626,44 @@ group.option('str').resolve
 When an "else" is not defined and none of the conditions match, a null value will be returned.
 
 The syntax for conditionals and complex conditionals is documented above in the chapter about conditionals.
+
+### yaml
+
+Hint is a hash defining filename or variable containing YAML source and optionally a key
+
+Example:
+```yaml
+# Read a string value from a key in YAML file
+str:
+  type: string
+  from:
+    yaml:
+      file: .env
+      key: STR
+
+# Read an array from a nested key in a YAML file
+str2:
+  type: array
+  from:
+    yaml:
+      file: variables.yml
+      key: variables.str2.value # assuming { variables: { str2: { value: ["abcd", "defg"] } } }
+
+# Read a YAML file into a string
+yaml_content:
+  type: string
+  from:
+    file: /etc/config.yml
+
+# Read YAML content from a variable and fetch a key from it
+str3:
+  type: string
+  from:
+    yaml:
+      variable: yaml_content
+      key: settings.cpu_arch
+```
+
 
 ## Default setters
 
