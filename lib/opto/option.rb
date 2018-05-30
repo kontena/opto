@@ -138,7 +138,13 @@ module Opto
       hash[:skip_if] = skip_if if skip_if
       hash[:only_if] = only_if if only_if
       hash[:errors]  = errors  if with_errors
-      hash[:value]   = value   if with_value
+      if with_value
+        if type == 'group'
+          hash[:value]   = value.to_h(with_values: true, with_errors: with_errors)
+        else
+          hash[:value] = value
+        end
+      end
       hash
     end
 
